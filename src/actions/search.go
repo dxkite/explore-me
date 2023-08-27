@@ -2,7 +2,9 @@ package actions
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"path"
 
 	"dxkite.cn/explorer/src/core"
@@ -41,6 +43,26 @@ func Search(cfg *core.Config) func(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, rst)
+		mdl := createMetaList(cfg, rst)
+		c.JSON(http.StatusOK, mdl)
 	}
+}
+
+func createMetaList(cfg *core.Config, fia []*core.FileInfo) []*MetaData {
+	md := []*MetaData{}
+
+	for _, f := range fia {
+		filename := path.Join(cfg.SrcRoot, f.Path)
+
+		fi, err := os.Stat(filename)
+		if err != nil {
+			log.Println("error", err)
+			continue
+		}
+
+		mdi := createMeta(cfg, filename, fi)
+		md = append(md, mdi)
+	}
+
+	return md
 }

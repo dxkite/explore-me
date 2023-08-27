@@ -13,10 +13,10 @@ import (
 )
 
 type FileInfo struct {
-	Name string   `json:"name"`
-	Path string   `json:"path"`
-	Tags []string `json:"tags"`
-	Ext  string   `json:"ext"`
+	Name string   `json:"n,omitempty"`
+	Path string   `json:"p,omitempty"`
+	Tags []string `json:"t,omitempty"`
+	Ext  string   `json:"e,omitempty"`
 }
 
 type MetaData struct {
