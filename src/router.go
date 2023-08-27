@@ -15,7 +15,7 @@ func Run(cfg *core.Config) error {
 	r.StaticFS("/api/explore/raw", http.Dir(cfg.SrcRoot))
 
 	//获取文件元信息
-	r.GET("/api/explore/meta/*path")
+	r.GET("/api/explore/meta/*path", actions.Meta(cfg))
 
 	//获取标签信息
 	r.GET("/api/explore/tags", actions.Tags(cfg))

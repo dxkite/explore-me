@@ -126,7 +126,7 @@ func (ic *IndexCreator) createIndexFile(root, dataRoot string) error {
 		}
 
 		name := info.Name()
-		ext := getExt(name)
+		ext := GetExt(name)
 
 		if ic.ignoreNameMap[name] {
 			if info.IsDir() {
@@ -229,6 +229,15 @@ func writeJsonFile(filename string, v interface{}) error {
 	return nil
 }
 
+func ParseTag(cfg *Config, name string) ([]string, error) {
+	reg, err := regexp.Compile(cfg.ScanConfig.TagExpr)
+	if err != nil {
+		return []string{}, err
+	}
+
+	return parseTag(name, reg)
+}
+
 func parseTag(name string, reg *regexp.Regexp) ([]string, error) {
 	matches := reg.FindAllStringSubmatch(name, -1)
 	tags := []string{}
@@ -242,10 +251,17 @@ func normalizePath(filename string) string {
 	return strings.ReplaceAll(filename, "\\", "/")
 }
 
-func getExt(filename string) string {
+func GetExt(filename string) string {
 	ext := filepath.Ext(filename)
 	if len(ext) <= 1 {
 		return ""
 	}
 	return strings.ToLower(ext[1:])
+}
+
+func NormalizePath(root, filename string) string {
+	absRoot, _ := filepath.Abs(root)
+	absName, _ := filepath.Abs(filename)
+	newName := strings.TrimPrefix(absName, absRoot)
+	return normalizePath(newName)
 }

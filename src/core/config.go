@@ -19,6 +19,7 @@ type ScanConfig struct {
 	// [(.*)] 标签表达式
 	TagExpr string `yaml:"tag_expr" default:"\\[(.+?)\\]"`
 
+	ReadmeFile  string `yaml:"readme_file" default:"README.md"`
 	TagListFile string `yaml:"tag_list_file" default:"tags.json"`
 	ExtListFile string `yaml:"ext_list_file" default:"exts.json"`
 	IndexFile   string `yaml:"index_file" default:"index.json"`
