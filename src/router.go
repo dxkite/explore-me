@@ -5,6 +5,7 @@ import (
 
 	"dxkite.cn/explorer/src/actions"
 	"dxkite.cn/explorer/src/core"
+	goget "dxkite.cn/explorer/src/middleware/go-get"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +33,7 @@ func Run(cfg *core.Config) error {
 	mtx.Handle("/api/", r.Handler())
 
 	// web根目录
-	mtx.Handle("/", http.FileServer(http.Dir(cfg.WebRoot)))
+	mtx.Handle("/", goget.Middleware(&cfg.GoGetConfig, http.FileServer(http.Dir(cfg.WebRoot))))
 
 	return http.ListenAndServe(cfg.Listen, mtx)
 }

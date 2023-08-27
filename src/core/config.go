@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	goget "dxkite.cn/explorer/src/middleware/go-get"
 	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
 )
@@ -36,6 +37,8 @@ type Config struct {
 	DataRoot string `yaml:"data_root" default:"./data"`
 	// 解析配置
 	ScanConfig ScanConfig `yaml:"scan_config"`
+	// go-get
+	GoGetConfig goget.PackageConfig `yaml:"go_get_config"`
 }
 
 func LoadConfig(filename string) (*Config, error) {
