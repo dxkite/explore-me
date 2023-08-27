@@ -9,11 +9,8 @@ import (
 )
 
 func Run(cfg *core.Config) error {
+
 	r := gin.Default()
-
-	// 获取原始文件内容
-	r.StaticFS("/api/explore/raw", http.Dir(cfg.SrcRoot))
-
 	//获取文件元信息
 	r.GET("/api/explore/meta/*path", actions.Meta(cfg))
 
@@ -26,5 +23,16 @@ func Run(cfg *core.Config) error {
 	//搜索文件
 	r.GET("/api/explore/search", actions.Search(cfg))
 
-	return r.Run(cfg.Listen)
+	// 获取原始文件内容
+	r.StaticFS("/api/explore/raw", http.Dir(cfg.SrcRoot))
+
+	mtx := http.NewServeMux()
+
+	// API
+	mtx.Handle("/api/", r.Handler())
+
+	// web根目录
+	mtx.Handle("/", http.FileServer(http.Dir(cfg.WebRoot)))
+
+	return http.ListenAndServe(cfg.Listen, mtx)
 }
