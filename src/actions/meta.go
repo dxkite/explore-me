@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"dxkite.cn/explorer/src/core"
 	"github.com/gin-gonic/gin"
@@ -55,6 +56,7 @@ type MetaData struct {
 	Ext      string      `json:"ext,omitempty"`
 	IsDir    bool        `json:"is_dir"`
 	Readme   string      `json:"readme"`
+	ModTime  string      `json:"mod_time"`
 	Children []*MetaData `json:"children,omitempty"`
 }
 
@@ -65,6 +67,7 @@ func createMeta(cfg *core.Config, pathname string, fi fs.FileInfo) *MetaData {
 	m.Tags, _ = core.ParseTag(cfg, m.Name)
 	m.Ext = core.GetExt(m.Name)
 	m.IsDir = fi.IsDir()
+	m.ModTime = fi.ModTime().Format(time.DateTime)
 
 	if m.IsDir {
 		rm := path.Join(pathname, cfg.ScanConfig.ReadmeFile)
