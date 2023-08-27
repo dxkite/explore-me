@@ -30,11 +30,16 @@ type SearchParams struct {
 	Ext  string
 }
 
+type ExtValue struct {
+	Count  int  `json:"count"`
+	Ignore bool `json:"ignore"`
+}
+
 type IndexCreator struct {
 	Config        *ScanConfig
 	ignoreNameMap map[string]bool
-	extMap        map[string]bool
-	tagMap        map[string]bool
+	extMap        map[string]ExtValue
+	tagMap        map[string]int
 }
 
 func InitIndex(cfg *Config) error {
@@ -51,12 +56,12 @@ func NewIndexCreator(cfg *ScanConfig) *IndexCreator {
 		ic.ignoreNameMap[v] = true
 	}
 
-	ic.extMap = map[string]bool{}
+	ic.extMap = map[string]ExtValue{}
 	for _, v := range cfg.IgnoreExt {
-		ic.extMap[v] = true
+		ic.extMap[v] = ExtValue{Ignore: true}
 	}
 
-	ic.tagMap = map[string]bool{}
+	ic.tagMap = map[string]int{}
 	return ic
 }
 
@@ -111,6 +116,8 @@ func (ic *IndexCreator) createIndexFile(root, dataRoot string) error {
 		return err
 	}
 
+	defer idx.Close()
+
 	absRootPath, _ := filepath.Abs(root)
 
 	return filepath.Walk(root, func(path string, info fs.FileInfo, err error) error {
@@ -132,11 +139,16 @@ func (ic *IndexCreator) createIndexFile(root, dataRoot string) error {
 			return nil
 		}
 
-		if ic.extMap[ext] {
-			return nil
+		if v, ok := ic.extMap[ext]; ok {
+			v.Count++
+			ic.extMap[ext] = v
+		} else {
+			ic.extMap[ext] = ExtValue{Count: 1}
 		}
 
-		ic.extMap[ext] = false
+		if v, ok := ic.extMap[ext]; ok && v.Ignore {
+			return nil
+		}
 
 		tags, err := parseTag(name, reg)
 		if err != nil {
@@ -144,7 +156,7 @@ func (ic *IndexCreator) createIndexFile(root, dataRoot string) error {
 		}
 
 		for _, v := range tags {
-			ic.tagMap[v] = true
+			ic.tagMap[v]++
 		}
 
 		filePath := strings.TrimPrefix(path, absRootPath)
@@ -194,11 +206,7 @@ func (ic *IndexCreator) createExtListFile(dataRoot string) error {
 
 func (ic *IndexCreator) createTagListFile(dataRoot string) error {
 	filename := path.Join(dataRoot, ic.Config.TagListFile)
-	tags := []string{}
-	for k := range ic.tagMap {
-		tags = append(tags, k)
-	}
-	if err := writeJsonFile(filename, tags); err != nil {
+	if err := writeJsonFile(filename, ic.tagMap); err != nil {
 		return err
 	}
 	return nil
@@ -209,6 +217,8 @@ func writeJsonFile(filename string, v interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	defer f.Close()
 	if data, err := json.Marshal(v); err != nil {
 		return err
 	} else {

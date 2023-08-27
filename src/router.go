@@ -18,7 +18,10 @@ func Run(cfg *core.Config) error {
 	r.GET("/api/explore/meta/*path")
 
 	//获取标签信息
-	r.GET("/api/explore/tags")
+	r.GET("/api/explore/tags", actions.Tags(cfg))
+
+	//获取扩展信息
+	r.GET("/api/explore/exts", actions.Exts(cfg))
 
 	//搜索文件
 	r.GET("/api/explore/search", actions.Search(cfg))
