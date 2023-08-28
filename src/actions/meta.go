@@ -39,10 +39,12 @@ func Meta(cfg *core.Config) func(c *gin.Context) {
 		m := createMeta(cfg, pathname, fi)
 
 		if m.IsDir {
-			if ch, err := getDir(cfg, pathname); err != nil {
+			if ch, rm, err := getDir(cfg, pathname); err != nil {
 				log.Println(err.Error())
 			} else {
 				m.Children = ch
+				rm := path.Join(pathname, rm.Name())
+				m.Readme = core.NormalizePath(cfg.SrcRoot, rm)
 			}
 		}
 		c.JSON(http.StatusOK, m)
@@ -68,18 +70,6 @@ func createMeta(cfg *core.Config, pathname string, fi fs.FileInfo) *MetaData {
 	m.Ext = core.GetExt(m.Name)
 	m.IsDir = fi.IsDir()
 	m.ModTime = fi.ModTime().Format(time.DateTime)
-
-	if m.IsDir {
-		rm := path.Join(pathname, cfg.ScanConfig.ReadmeFile)
-		if isExist(rm) {
-			m.Readme = core.NormalizePath(cfg.SrcRoot, rm)
-		}
-	} else {
-		rm := pathname + "." + cfg.ScanConfig.ReadmeFile
-		if isExist(rm) {
-			m.Readme = core.NormalizePath(cfg.SrcRoot, rm)
-		}
-	}
 	return m
 }
 
@@ -91,18 +81,23 @@ func isExist(filename string) bool {
 	return true
 }
 
-func getDir(cfg *core.Config, dirname string) ([]*MetaData, error) {
+func getDir(cfg *core.Config, dirname string) ([]*MetaData, fs.FileInfo, error) {
 	rd, err := os.ReadDir(dirname)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	md := []*MetaData{}
+	var readme fs.FileInfo
+	rmn := strings.ToLower(cfg.ScanConfig.ReadmeFile)
 	for _, de := range rd {
 		pathname := path.Join(dirname, de.Name())
 		fi, _ := de.Info()
 		mdi := createMeta(cfg, pathname, fi)
 		md = append(md, mdi)
+		if strings.ToLower(fi.Name()) == rmn {
+			readme = fi
+		}
 	}
-	return md, nil
+	return md, readme, nil
 }

@@ -104,6 +104,12 @@ func (ic *IndexCreator) createIndexFile(root, dataRoot string) error {
 		return err
 	}
 
+	ignoreExpr, err := regexp.Compile(ic.Config.IgnoreNameExpr)
+	if err != nil {
+		log.Panicln("compile reg expr error", ic.Config.TagExpr, err)
+		return err
+	}
+
 	index := path.Join(dataRoot, ic.Config.IndexFile)
 	if err := os.MkdirAll(dataRoot, os.ModePerm); err != nil {
 		log.Panicln("mkdir all", dataRoot, err)
@@ -128,7 +134,7 @@ func (ic *IndexCreator) createIndexFile(root, dataRoot string) error {
 		name := info.Name()
 		ext := GetExt(name)
 
-		if ic.ignoreNameMap[name] {
+		if ic.ignoreNameMap[name] || ignoreExpr.Match([]byte(name)) {
 			if info.IsDir() {
 				return filepath.SkipDir
 			}
