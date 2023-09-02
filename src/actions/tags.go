@@ -5,10 +5,16 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"sort"
 
 	"dxkite.cn/explorer/src/core"
 	"github.com/gin-gonic/gin"
 )
+
+type TagItem struct {
+	Name  string `json:"name"`
+	Count int    `json:"count"`
+}
 
 func Tags(cfg *core.Config) func(c *gin.Context) {
 	return func(c *gin.Context) {
@@ -31,6 +37,18 @@ func Tags(cfg *core.Config) func(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, v)
+		vv := createTagList(v)
+		c.JSON(http.StatusOK, vv)
 	}
+}
+
+func createTagList(v map[string]int) []TagItem {
+	t := []TagItem{}
+	for v, c := range v {
+		t = append(t, TagItem{Name: v, Count: c})
+	}
+	sort.Slice(t, func(i, j int) bool {
+		return t[i].Name > t[j].Name
+	})
+	return t
 }

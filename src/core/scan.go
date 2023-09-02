@@ -269,5 +269,8 @@ func NormalizePath(root, filename string) string {
 	absRoot, _ := filepath.Abs(root)
 	absName, _ := filepath.Abs(filename)
 	newName := strings.TrimPrefix(absName, absRoot)
+	if newName == "" {
+		return "/"
+	}
 	return normalizePath(newName)
 }

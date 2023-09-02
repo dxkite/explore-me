@@ -39,10 +39,13 @@ func Meta(cfg *core.Config) func(c *gin.Context) {
 		m := createMeta(cfg, pathname, fi)
 
 		if m.IsDir {
-			if ch, rm, err := getDir(cfg, pathname); err != nil {
-				log.Println(err.Error())
-			} else {
+			ch, rm, _ := getDir(cfg, pathname)
+
+			if ch != nil {
 				m.Children = ch
+			}
+
+			if rm != nil {
 				rm := path.Join(pathname, rm.Name())
 				m.Readme = core.NormalizePath(cfg.SrcRoot, rm)
 			}
@@ -84,6 +87,7 @@ func isExist(filename string) bool {
 func getDir(cfg *core.Config, dirname string) ([]*MetaData, fs.FileInfo, error) {
 	rd, err := os.ReadDir(dirname)
 	if err != nil {
+		log.Panicln("get dir error", err)
 		return nil, nil, err
 	}
 
