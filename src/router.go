@@ -33,7 +33,9 @@ func Run(cfg *core.Config) error {
 	mtx.Handle("/api/", r.Handler())
 
 	// web根目录
-	mtx.Handle("/", goget.Middleware(&cfg.GoGetConfig, http.FileServer(http.Dir(cfg.WebRoot))))
+	mtx.Handle("/", goget.Middleware(func() *goget.PackageConfig {
+		return &core.GetConfig().GoGetConfig
+	}, http.FileServer(http.Dir(cfg.WebRoot))))
 
 	return http.ListenAndServe(cfg.Listen, mtx)
 }

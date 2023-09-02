@@ -37,9 +37,10 @@ func render(w io.Writer, data Package) error {
 	return tmp.Execute(w, data)
 }
 
-func Middleware(cfg *PackageConfig, handler http.Handler) http.Handler {
+func Middleware(fn func() *PackageConfig, handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("go-get", r.URL.String())
+		cfg := fn()
 
 		goGet := r.URL.Query().Get("go-get") == "1"
 		if !goGet {

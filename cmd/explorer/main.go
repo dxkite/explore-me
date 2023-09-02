@@ -9,8 +9,10 @@ import (
 	"dxkite.cn/explorer/src/core"
 )
 
-func Async(filename string, cfg *core.Config, ticker *time.Ticker) {
+func Async(filename string, ticker *time.Ticker) {
 	for range ticker.C {
+		core.LoadConfig(filename)
+		cfg := core.GetConfig()
 		log.Println("init index", cfg.DataRoot, "scan", cfg.SrcRoot)
 		if err := core.InitIndex(cfg); err != nil {
 			log.Fatalln("InitIndexErr", err)
@@ -25,21 +27,22 @@ func main() {
 		filename = os.Args[1]
 	}
 
-	ticker := time.NewTicker(2 * time.Second)
-	defer ticker.Stop()
-
-	cfg, err := core.LoadConfig(filename)
+	err := core.InitConfig(filename)
 	if err != nil {
 		panic(err)
 	}
 
+	cfg := core.GetConfig()
 	log.Println("init index", cfg.DataRoot, "scan", cfg.SrcRoot)
 	if err := core.InitIndex(cfg); err != nil {
 		log.Fatalln("InitIndexErr", err)
 		return
 	}
 
-	go Async(filename, cfg, ticker)
+	ticker := time.NewTicker(time.Second * time.Duration(cfg.AsyncLoad))
+	defer ticker.Stop()
+
+	go Async(filename, ticker)
 
 	log.Println("start server")
 	if err := src.Run(cfg); err != nil {
