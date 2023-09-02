@@ -37,6 +37,8 @@ type Config struct {
 	DataRoot string `yaml:"data_root" default:"./data"`
 	// 解析配置
 	ScanConfig ScanConfig `yaml:"scan_config"`
+	// 自动刷新时间 60s
+	AsyncLoad int `yaml:"async_time" default:"60"`
 	// go-get
 	GoGetConfig goget.PackageConfig `yaml:"go_get_config"`
 }
@@ -62,4 +64,22 @@ func LoadConfig(filename string) (*Config, error) {
 	}
 
 	return cfg, nil
+}
+
+var cfg *Config
+
+func GetConfig() *Config {
+	if cfg == nil {
+		return &Config{}
+	}
+	return cfg
+}
+
+func InitConfig(filename string) error {
+	c, err := LoadConfig(filename)
+	if err != nil {
+		return err
+	}
+	cfg = c
+	return nil
 }
