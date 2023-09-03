@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"os"
 
 	goget "dxkite.cn/explorer/src/middleware/go-get"
@@ -49,8 +48,6 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, err
 	}
 
-	fmt.Println(filename, cfg)
-
 	c, err := os.ReadFile(filename)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -70,7 +67,9 @@ var cfg *Config
 
 func GetConfig() *Config {
 	if cfg == nil {
-		return &Config{}
+		c := &Config{}
+		defaults.Set(c)
+		return c
 	}
 	return cfg
 }
