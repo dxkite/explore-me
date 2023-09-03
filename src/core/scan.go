@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"dxkite.cn/explorer/src/core/config"
 )
 
 type FileInfo struct {
@@ -36,18 +38,18 @@ type ExtValue struct {
 }
 
 type IndexCreator struct {
-	Config        *ScanConfig
+	Config        *config.ScanConfig
 	ignoreNameMap map[string]bool
 	extMap        map[string]ExtValue
 	tagMap        map[string]int
 }
 
-func InitIndex(cfg *Config) error {
+func InitIndex(cfg *config.Config) error {
 	ic := NewIndexCreator(&cfg.ScanConfig)
 	return ic.Create(cfg.SrcRoot, cfg.DataRoot)
 }
 
-func NewIndexCreator(cfg *ScanConfig) *IndexCreator {
+func NewIndexCreator(cfg *config.ScanConfig) *IndexCreator {
 	ic := &IndexCreator{}
 	ic.Config = cfg
 
@@ -235,7 +237,7 @@ func writeJsonFile(filename string, v interface{}) error {
 	return nil
 }
 
-func ParseTag(cfg *Config, name string) ([]string, error) {
+func ParseTag(cfg *config.Config, name string) ([]string, error) {
 	reg, err := regexp.Compile(cfg.ScanConfig.TagExpr)
 	if err != nil {
 		return []string{}, err

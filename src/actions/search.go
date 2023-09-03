@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"dxkite.cn/explorer/src/core"
+	"dxkite.cn/explorer/src/core/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,35 +21,35 @@ type SearchRequest struct {
 	Limit  int `form:"limit"`
 }
 
-func Search(cfg *core.Config) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		req := &SearchRequest{}
+func Search(c *gin.Context) {
+	cfg := config.GetConfig()
 
-		if err := c.ShouldBindQuery(req); err != nil {
-			c.JSON(http.StatusBadRequest, Error{Code: ParamError, Message: err.Error()})
-			return
-		}
+	req := &SearchRequest{}
 
-		idx := path.Join(cfg.DataRoot, cfg.ScanConfig.IndexFile)
-
-		param := core.SearchParams{
-			Name: req.Name,
-			Ext:  req.Ext,
-			Tag:  req.Tag,
-		}
-		fmt.Println(param)
-		rst, err := core.SearchFile(idx, param, req.Offset, req.Limit)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, Error{Code: InternalError, Message: err.Error()})
-			return
-		}
-
-		mdl := createMetaList(cfg, rst)
-		c.JSON(http.StatusOK, mdl)
+	if err := c.ShouldBindQuery(req); err != nil {
+		c.JSON(http.StatusBadRequest, Error{Code: ParamError, Message: err.Error()})
+		return
 	}
+
+	idx := path.Join(cfg.DataRoot, cfg.ScanConfig.IndexFile)
+
+	param := core.SearchParams{
+		Name: req.Name,
+		Ext:  req.Ext,
+		Tag:  req.Tag,
+	}
+	fmt.Println(param)
+	rst, err := core.SearchFile(idx, param, req.Offset, req.Limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Error{Code: InternalError, Message: err.Error()})
+		return
+	}
+
+	mdl := createMetaList(cfg, rst)
+	c.JSON(http.StatusOK, mdl)
 }
 
-func createMetaList(cfg *core.Config, fia []*core.FileInfo) []*MetaData {
+func createMetaList(cfg *config.Config, fia []*core.FileInfo) []*MetaData {
 	md := []*MetaData{}
 
 	for _, f := range fia {

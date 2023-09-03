@@ -11,47 +11,48 @@ import (
 	"time"
 
 	"dxkite.cn/explorer/src/core"
+	"dxkite.cn/explorer/src/core/config"
 	"github.com/gin-gonic/gin"
 )
 
-func Meta(cfg *core.Config) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		p := c.Param("path")
-		pathname := path.Join(cfg.SrcRoot, p)
+func Meta(c *gin.Context) {
+	cfg := config.GetConfig()
 
-		log.Println(pathname)
+	p := c.Param("path")
+	pathname := path.Join(cfg.SrcRoot, p)
 
-		fi, err := os.Stat(pathname)
-		if err != nil {
-			if os.IsNotExist(err) {
-				c.Status(http.StatusNotFound)
-				return
-			}
-		}
+	log.Println(pathname)
 
-		absRoot, _ := filepath.Abs(cfg.SrcRoot)
-		absPathname, _ := filepath.Abs(pathname)
-		if !strings.HasPrefix(absPathname, absRoot) {
+	fi, err := os.Stat(pathname)
+	if err != nil {
+		if os.IsNotExist(err) {
 			c.Status(http.StatusNotFound)
 			return
 		}
-
-		m := createMeta(cfg, pathname, fi)
-
-		if m.IsDir {
-			ch, rm, _ := getDir(cfg, pathname)
-
-			if ch != nil {
-				m.Children = ch
-			}
-
-			if rm != nil {
-				rm := path.Join(pathname, rm.Name())
-				m.Readme = core.NormalizePath(cfg.SrcRoot, rm)
-			}
-		}
-		c.JSON(http.StatusOK, m)
 	}
+
+	absRoot, _ := filepath.Abs(cfg.SrcRoot)
+	absPathname, _ := filepath.Abs(pathname)
+	if !strings.HasPrefix(absPathname, absRoot) {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	m := createMeta(cfg, pathname, fi)
+
+	if m.IsDir {
+		ch, rm, _ := getDir(cfg, pathname)
+
+		if ch != nil {
+			m.Children = ch
+		}
+
+		if rm != nil {
+			rm := path.Join(pathname, rm.Name())
+			m.Readme = core.NormalizePath(cfg.SrcRoot, rm)
+		}
+	}
+	c.JSON(http.StatusOK, m)
 }
 
 type MetaData struct {
@@ -65,7 +66,7 @@ type MetaData struct {
 	Children []*MetaData `json:"children,omitempty"`
 }
 
-func createMeta(cfg *core.Config, pathname string, fi fs.FileInfo) *MetaData {
+func createMeta(cfg *config.Config, pathname string, fi fs.FileInfo) *MetaData {
 	m := &MetaData{}
 	m.Name = fi.Name()
 	m.Path = core.NormalizePath(cfg.SrcRoot, pathname)
@@ -84,7 +85,7 @@ func isExist(filename string) bool {
 	return true
 }
 
-func getDir(cfg *core.Config, dirname string) ([]*MetaData, fs.FileInfo, error) {
+func getDir(cfg *config.Config, dirname string) ([]*MetaData, fs.FileInfo, error) {
 	rd, err := os.ReadDir(dirname)
 	if err != nil {
 		log.Panicln("get dir error", err)

@@ -7,12 +7,13 @@ import (
 
 	"dxkite.cn/explorer/src"
 	"dxkite.cn/explorer/src/core"
+	"dxkite.cn/explorer/src/core/config"
 )
 
 func Async(filename string, ticker *time.Ticker) {
 	for range ticker.C {
-		core.LoadConfig(filename)
-		cfg := core.GetConfig()
+		config.LoadConfig(filename)
+		cfg := config.GetConfig()
 		log.Println("init index", cfg.DataRoot, "scan", cfg.SrcRoot)
 		if err := core.InitIndex(cfg); err != nil {
 			log.Fatalln("InitIndexErr", err)
@@ -27,12 +28,12 @@ func main() {
 		filename = os.Args[1]
 	}
 
-	err := core.InitConfig(filename)
+	err := config.InitConfig(filename)
 	if err != nil {
 		panic(err)
 	}
 
-	cfg := core.GetConfig()
+	cfg := config.GetConfig()
 	log.Println("init index", cfg.DataRoot, "scan", cfg.SrcRoot)
 	if err := core.InitIndex(cfg); err != nil {
 		log.Fatalln("InitIndexErr", err)
