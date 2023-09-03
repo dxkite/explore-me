@@ -66,22 +66,24 @@ func SearchFile(filename string, match SearchParams, offset, limit int64) ([]*Se
 
 func createSearchParam(match SearchParams) [][]string {
 	param := [][]string{}
+	cond := []string{}
 	if match.Name != "" {
-		param = append(param, []string{match.Name})
+		cond = append(cond, match.Name)
 	}
 
 	if match.Ext != "" {
-		param = append(param, []string{match.Ext})
+		cond = append(cond, match.Ext)
 	}
 
 	if match.Tag != "" {
-		param = append(param, []string{match.Tag})
+		cond = append(cond, match.Tag)
 	}
 
 	if match.Path != "" {
-		param = append(param, []string{match.Path})
+		cond = append(cond, match.Path)
 	}
 
+	param = append(param, cond)
 	return param
 }
 
@@ -108,7 +110,7 @@ func isMatchSearch(fi *FileInfo, match SearchParams) bool {
 	if match.Tag != "" {
 		mm := false
 		for _, t := range fi.Tags {
-			if t == match.Ext {
+			if t == match.Tag {
 				mm = true
 				break
 			}

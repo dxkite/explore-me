@@ -8,8 +8,9 @@ import (
 )
 
 type JsonStream struct {
-	r io.ReadSeeker
-	s *bufio.Scanner
+	r      io.ReadSeeker
+	s      *bufio.Scanner
+	offset int64
 }
 
 func NewJsonStream(r io.ReadSeekCloser) *JsonStream {
@@ -22,17 +23,16 @@ func (j *JsonStream) Offset(offset int64) error {
 		return err
 	}
 	j.s = bufio.NewScanner(j.r)
+	j.offset = offset
 	return nil
 }
 
 func (j *JsonStream) ScanNext(rst interface{}, cond [][]string) (int64, interface{}, error) {
 	for j.s.Scan() {
+		offset := j.offset
 		text := j.s.Text()
+		j.offset += int64(len(text))
 		if j.match(text, cond) {
-			offset, err := j.current()
-			if err != nil {
-				return 0, nil, err
-			}
 			rstObj, err := j.decode(text, rst)
 			if err != nil {
 				return offset, nil, err
@@ -41,10 +41,6 @@ func (j *JsonStream) ScanNext(rst interface{}, cond [][]string) (int64, interfac
 		}
 	}
 	return 0, nil, io.EOF
-}
-
-func (j *JsonStream) current() (int64, error) {
-	return j.r.Seek(0, io.SeekCurrent)
 }
 
 func (j *JsonStream) decode(text string, rst interface{}) (interface{}, error) {

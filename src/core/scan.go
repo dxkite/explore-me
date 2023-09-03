@@ -167,7 +167,6 @@ func (ic *IndexCreator) createIndexFile(root, dataRoot string) error {
 		filePath := strings.TrimPrefix(absPath, absRootPath)
 		filePath = normalizePath(filePath)
 
-		log.Println("TrimPrefix", absRootPath, path, filePath)
 		v := FileInfo{
 			Name: name,
 			Path: filePath,
