@@ -1,37 +1,60 @@
 package core
 
 import (
-	"bufio"
 	"encoding/json"
+	"io"
+	"log"
 	"os"
 	"strings"
+
+	"dxkite.cn/explorer/src/core/stream"
 )
 
-func SearchFile(filename string, match SearchParams, offset, limit int) ([]*FileInfo, error) {
+type SearchParams struct {
+	Name string
+	Tag  string
+	Ext  string
+	Path string
+}
+
+type SearchFileInfo struct {
+	Id int64 `json:"id"`
+	*FileInfo
+}
+
+func SearchFile(filename string, match SearchParams, offset, limit int64) ([]*SearchFileInfo, error) {
 	f, err := os.OpenFile(filename, os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
 
-	rst := []*FileInfo{}
-	s := bufio.NewScanner(f)
+	defer f.Close()
 
-	skip := 0
-	take := 0
-	for s.Scan() {
-		line := s.Text()
+	s := stream.NewJsonStream(f)
+	v := createSearchParam(match)
 
-		if !isFuzzyMatchSearch(line, match) {
+	rst := []*SearchFileInfo{}
+
+	var take int64
+
+	for {
+		offset, info, err := s.ScanNext(&FileInfo{}, v)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err
+		}
+
+		fi := info.(*FileInfo)
+
+		if !isMatchSearch(fi, match) {
 			continue
 		}
-		fi, ok := isMatchSearch(line, match)
 
-		if !ok {
-			continue
-		}
-
-		if skip < offset {
-			skip++
+		rst = append(rst, &SearchFileInfo{Id: offset, FileInfo: fi})
+		take++
+		if limit == -1 {
 			continue
 		}
 
@@ -39,47 +62,57 @@ func SearchFile(filename string, match SearchParams, offset, limit int) ([]*File
 			break
 		}
 
-		take++
-
-		rst = append(rst, fi)
 	}
 	return rst, nil
 }
 
-// 模糊匹配
-func isFuzzyMatchSearch(text string, match SearchParams) bool {
-	if match.Name != "" && strings.Index(text, match.Name) >= 0 {
-		return true
+func createSearchParam(match SearchParams) [][]string {
+	param := [][]string{}
+	if match.Name != "" {
+		param = append(param, []string{match.Name})
 	}
-	if match.Ext != "" && strings.Index(text, match.Ext) >= 0 {
-		return true
+
+	if match.Ext != "" {
+		param = append(param, []string{match.Ext})
 	}
-	if match.Tag != "" && strings.Index(text, match.Tag) >= 0 {
-		return true
+
+	if match.Tag != "" {
+		param = append(param, []string{match.Tag})
 	}
-	return false
+
+	if match.Path != "" {
+		param = append(param, []string{match.Path})
+	}
+
+	return param
 }
 
 // 强匹配
-func isMatchSearch(text string, match SearchParams) (*FileInfo, bool) {
-	fi := &FileInfo{}
+func isMatchSearch(fi *FileInfo, match SearchParams) bool {
+	v, _ := json.Marshal(fi)
+	m, _ := json.Marshal(fi)
 
-	if err := json.Unmarshal([]byte(text), fi); err != nil {
-		return nil, false
+	log.Println("match", string(v), string(m))
+
+	if match.Path != "" && strings.Index(fi.Path, match.Path) >= 0 {
+		return true
 	}
 
 	if match.Name != "" && strings.Index(fi.Name, match.Name) >= 0 {
-		return fi, true
+		return true
 	}
 
 	if match.Ext != "" && fi.Ext == match.Ext {
-		return fi, true
+		return true
 	}
 
-	for _, t := range fi.Tags {
-		if match.Tag != "" && t == match.Ext {
-			return fi, true
+	if match.Tag != "" {
+		for _, t := range fi.Tags {
+			if t == match.Ext {
+				return true
+			}
 		}
 	}
-	return nil, false
+
+	return false
 }

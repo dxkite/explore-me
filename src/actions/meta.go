@@ -56,6 +56,7 @@ func Meta(c *gin.Context) {
 }
 
 type MetaData struct {
+	Id       int64       `json:"id,omitempty"`
 	Name     string      `json:"name"`
 	Path     string      `json:"path"`
 	Tags     []string    `json:"tags,omitempty"`

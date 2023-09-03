@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,12 +12,13 @@ import (
 )
 
 type SearchRequest struct {
+	Path string `form:"path"`
 	Name string `form:"name"`
 	Ext  string `form:"ext"`
 	Tag  string `form:"tag"`
 
-	Offset int `form:"offset"`
-	Limit  int `form:"limit"`
+	Offset int64 `form:"offset"`
+	Limit  int64 `form:"limit"`
 }
 
 func Search(c *gin.Context) {
@@ -38,7 +38,9 @@ func Search(c *gin.Context) {
 		Ext:  req.Ext,
 		Tag:  req.Tag,
 	}
-	fmt.Println(param)
+
+	log.Println("search", param)
+
 	rst, err := core.SearchFile(idx, param, req.Offset, req.Limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Error{Code: InternalError, Message: err.Error()})
@@ -49,7 +51,7 @@ func Search(c *gin.Context) {
 	c.JSON(http.StatusOK, mdl)
 }
 
-func createMetaList(cfg *config.Config, fia []*core.FileInfo) []*MetaData {
+func createMetaList(cfg *config.Config, fia []*core.SearchFileInfo) []*MetaData {
 	md := []*MetaData{}
 
 	for _, f := range fia {
@@ -57,11 +59,12 @@ func createMetaList(cfg *config.Config, fia []*core.FileInfo) []*MetaData {
 
 		fi, err := os.Stat(filename)
 		if err != nil {
-			log.Println("error", err)
+			log.Println("createMetaList:Stat", filename, err)
 			continue
 		}
 
 		mdi := createMeta(cfg, filename, fi)
+		mdi.Id = f.Id
 		md = append(md, mdi)
 	}
 

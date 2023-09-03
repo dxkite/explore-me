@@ -26,12 +26,6 @@ type MetaData struct {
 	CreateTime time.Time `json:"create_time"`
 }
 
-type SearchParams struct {
-	Name string
-	Tag  string
-	Ext  string
-}
-
 type ExtValue struct {
 	Count  int  `json:"count"`
 	Ignore bool `json:"ignore"`
@@ -81,6 +75,7 @@ func (ic *IndexCreator) Create(root, dataRoot string) error {
 		meta.LastUpdate = fi.ModTime()
 	}
 
+	log.Println("update index")
 	if err := ic.createIndexFile(root, dataRoot); err != nil {
 		return err
 	}
