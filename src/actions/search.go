@@ -37,6 +37,7 @@ func Search(c *gin.Context) {
 		Name: req.Name,
 		Ext:  req.Ext,
 		Tag:  req.Tag,
+		Path: req.Path,
 	}
 
 	log.Println("search", param)

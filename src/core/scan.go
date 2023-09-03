@@ -75,7 +75,8 @@ func (ic *IndexCreator) Create(root, dataRoot string) error {
 		meta.LastUpdate = fi.ModTime()
 	}
 
-	log.Println("update index")
+	log.Println("update index", "root", root, "dataRoot", dataRoot)
+
 	if err := ic.createIndexFile(root, dataRoot); err != nil {
 		return err
 	}
@@ -162,8 +163,11 @@ func (ic *IndexCreator) createIndexFile(root, dataRoot string) error {
 			ic.tagMap[v]++
 		}
 
-		filePath := strings.TrimPrefix(path, absRootPath)
+		absPath, _ := filepath.Abs(path)
+		filePath := strings.TrimPrefix(absPath, absRootPath)
 		filePath = normalizePath(filePath)
+
+		log.Println("TrimPrefix", absRootPath, path, filePath)
 		v := FileInfo{
 			Name: name,
 			Path: filePath,

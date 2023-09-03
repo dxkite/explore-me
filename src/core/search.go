@@ -1,9 +1,7 @@
 package core
 
 import (
-	"encoding/json"
 	"io"
-	"log"
 	"os"
 	"strings"
 
@@ -89,30 +87,36 @@ func createSearchParam(match SearchParams) [][]string {
 
 // 强匹配
 func isMatchSearch(fi *FileInfo, match SearchParams) bool {
-	v, _ := json.Marshal(fi)
-	m, _ := json.Marshal(fi)
-
-	log.Println("match", string(v), string(m))
-
-	if match.Path != "" && strings.Index(fi.Path, match.Path) >= 0 {
-		return true
-	}
-
-	if match.Name != "" && strings.Index(fi.Name, match.Name) >= 0 {
-		return true
-	}
-
-	if match.Ext != "" && fi.Ext == match.Ext {
-		return true
-	}
-
-	if match.Tag != "" {
-		for _, t := range fi.Tags {
-			if t == match.Ext {
-				return true
-			}
+	if match.Path != "" {
+		if strings.Index(fi.Path, match.Path) == -1 {
+			return false
 		}
 	}
 
-	return false
+	if match.Name != "" {
+		if strings.Index(fi.Name, match.Name) == -1 {
+			return false
+		}
+	}
+
+	if match.Ext != "" {
+		if fi.Ext != match.Ext {
+			return false
+		}
+	}
+
+	if match.Tag != "" {
+		mm := false
+		for _, t := range fi.Tags {
+			if t == match.Ext {
+				mm = true
+				break
+			}
+		}
+		if !mm {
+			return false
+		}
+	}
+
+	return true
 }
