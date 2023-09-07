@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 
-	"dxkite.cn/explorer/src/core"
 	"dxkite.cn/explorer/src/core/config"
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +16,7 @@ func Exts(c *gin.Context) {
 	f := path.Join(cfg.DataRoot, cfg.ScanConfig.ExtListFile)
 	data, err := os.ReadFile(f)
 
-	v := map[string]core.ExtValue{}
+	v := map[string]int{}
 
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -33,5 +32,6 @@ func Exts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, v)
+	vv := createMapItemArray(v)
+	c.JSON(http.StatusOK, vv)
 }

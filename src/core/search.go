@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"dxkite.cn/explorer/src/core/scan"
 	"dxkite.cn/explorer/src/core/stream"
 )
 
@@ -17,7 +18,7 @@ type SearchParams struct {
 
 type SearchFileInfo struct {
 	Id int64 `json:"id"`
-	*FileInfo
+	*scan.Index
 }
 
 func SearchFile(filename string, match SearchParams, offset, limit int64) ([]*SearchFileInfo, error) {
@@ -36,7 +37,7 @@ func SearchFile(filename string, match SearchParams, offset, limit int64) ([]*Se
 	var take int64
 
 	for {
-		offset, info, err := s.ScanNext(&FileInfo{}, v)
+		offset, info, err := s.ScanNext(&scan.Index{}, v)
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -44,13 +45,13 @@ func SearchFile(filename string, match SearchParams, offset, limit int64) ([]*Se
 			return nil, err
 		}
 
-		fi := info.(*FileInfo)
+		fi := info.(*scan.Index)
 
 		if !isMatchSearch(fi, match) {
 			continue
 		}
 
-		rst = append(rst, &SearchFileInfo{Id: offset, FileInfo: fi})
+		rst = append(rst, &SearchFileInfo{Id: offset, Index: fi})
 		take++
 		if limit == -1 {
 			continue
@@ -88,7 +89,7 @@ func createSearchParam(match SearchParams) [][]string {
 }
 
 // 强匹配
-func isMatchSearch(fi *FileInfo, match SearchParams) bool {
+func isMatchSearch(fi *scan.Index, match SearchParams) bool {
 	if match.Path != "" {
 		if strings.Index(fi.Path, match.Path) == -1 {
 			return false

@@ -15,7 +15,7 @@ func Async(filename string, ticker *time.Ticker) {
 		config.LoadConfig(filename)
 		cfg := config.GetConfig()
 		log.Println("init index", cfg.DataRoot, "scan", cfg.SrcRoot)
-		if err := core.InitIndex(cfg); err != nil {
+		if err := core.CreateIndex(cfg.SrcRoot, cfg.DataRoot); err != nil {
 			log.Fatalln("InitIndexErr", err)
 			return
 		}
@@ -35,7 +35,7 @@ func main() {
 
 	cfg := config.GetConfig()
 	log.Println("init index", cfg.DataRoot, "scan", cfg.SrcRoot)
-	if err := core.InitIndex(cfg); err != nil {
+	if err := core.CreateIndex(cfg.SrcRoot, cfg.DataRoot); err != nil {
 		log.Fatalln("InitIndexErr", err)
 		return
 	}

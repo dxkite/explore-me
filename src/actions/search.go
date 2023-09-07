@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -8,6 +9,7 @@ import (
 
 	"dxkite.cn/explorer/src/core"
 	"dxkite.cn/explorer/src/core/config"
+	"dxkite.cn/explorer/src/core/storage"
 	"github.com/gin-gonic/gin"
 )
 
@@ -54,6 +56,7 @@ func Search(c *gin.Context) {
 
 func createMetaList(cfg *config.Config, fia []*core.SearchFileInfo) []*MetaData {
 	md := []*MetaData{}
+	src := storage.Local(cfg.SrcRoot)
 
 	for _, f := range fia {
 		filename := path.Join(cfg.SrcRoot, f.Path)
@@ -64,7 +67,7 @@ func createMetaList(cfg *config.Config, fia []*core.SearchFileInfo) []*MetaData 
 			continue
 		}
 
-		mdi := createMeta(cfg, filename, fi)
+		mdi := createMeta(cfg, context.TODO(), src, filename, fi)
 		mdi.Id = f.Id
 		md = append(md, mdi)
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type TagItem struct {
+type MapItem struct {
 	Name  string `json:"name"`
 	Count int    `json:"count"`
 }
@@ -37,14 +37,14 @@ func Tags(c *gin.Context) {
 		return
 	}
 
-	vv := createTagList(v)
+	vv := createMapItemArray(v)
 	c.JSON(http.StatusOK, vv)
 }
 
-func createTagList(v map[string]int) []TagItem {
-	t := []TagItem{}
+func createMapItemArray(v map[string]int) []MapItem {
+	t := []MapItem{}
 	for v, c := range v {
-		t = append(t, TagItem{Name: v, Count: c})
+		t = append(t, MapItem{Name: v, Count: c})
 	}
 	sort.Slice(t, func(i, j int) bool {
 		return t[i].Name > t[j].Name
