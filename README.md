@@ -1,5 +1,5 @@
 # Explorer
 
-- [ ] explore file
-- [ ] preview markdown
+- [x] explore file
+- [x] preview markdown
 - [ ] preview media
