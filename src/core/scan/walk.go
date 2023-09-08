@@ -54,28 +54,14 @@ func walk(ctx context.Context, fs storage.FileSystem, name string, info fs.FileI
 		return fn(ctx, fs, name, info, nil)
 	}
 
-	ctx, err := createContextFromDir(ctx, fs, name)
-	if err != nil {
-		log.Println("createContextFromDir", err)
-		return err
-	}
-
-	infos, err := readDirNameFromFs(ctx, fs, name)
+	infos, err := ReadDir(ctx, fs, name)
 	if err != nil {
 		log.Println("readDirNameFromFs", err)
 		return err
 	}
 
-	cfg := getConfigFromContext(ctx)
-
-	sortNames(cfg, infos)
-
 	for _, item := range infos {
 		filename := path.Join(name, item.Name())
-		if isIgnoreName(cfg, item.Name()) {
-			continue
-		}
-
 		err := walk(ctx, fs, filename, item, fn)
 		if err != nil {
 			if !item.IsDir() || err != SkipDir {
@@ -145,7 +131,7 @@ func isIgnoreName(cfg *DirConfig, name string) bool {
 	return false
 }
 
-func readDirNameFromFs(ctx context.Context, fs storage.FileSystem, name string) ([]fs.FileInfo, error) {
+func readDir(ctx context.Context, fs storage.FileSystem, name string) ([]fs.FileInfo, error) {
 	f, err := fs.OpenFile(ctx, name, os.O_RDONLY, 0)
 	if err != nil {
 		return nil, err
@@ -155,6 +141,27 @@ func readDirNameFromFs(ctx context.Context, fs storage.FileSystem, name string) 
 		return nil, err
 	}
 	return list, nil
+}
+
+func ReadDir(ctx context.Context, src storage.FileSystem, name string) ([]fs.FileInfo, error) {
+	infos, err := readDir(ctx, src, name)
+	if err != nil {
+		return nil, err
+	}
+	if c, err := createContextFromDir(ctx, src, name); err == nil {
+		ctx = c
+	}
+	cfg := getConfigFromContext(ctx)
+	log.Println("ReadDir", cfg)
+	sortNames(cfg, infos)
+	newInfos := []fs.FileInfo{}
+	for _, item := range infos {
+		if isIgnoreName(cfg, item.Name()) {
+			continue
+		}
+		newInfos = append(newInfos, item)
+	}
+	return newInfos, nil
 }
 
 func createContextFromDir(ctx context.Context, fs storage.FileSystem, name string) (context.Context, error) {
@@ -183,6 +190,7 @@ func createContextFromDir(ctx context.Context, fs storage.FileSystem, name strin
 	}
 
 	log.Println("dir config", name, cfg)
+	ctx = context.WithValue(ctx, DirConfigKey, cfg)
 	return ctx, nil
 }
 
@@ -193,7 +201,10 @@ func getConfigFromContext(ctx context.Context) *DirConfig {
 	if v, ok := ctx.Value(DirConfigKey).(DirConfig); ok {
 		return &v
 	}
-	return nil
+	return &DirConfig{
+		ConfigName: ".dir-config.yaml",
+		MetaName:   ".meta.yaml",
+	}
 }
 
 func init() {
