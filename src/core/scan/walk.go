@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"sort"
 
@@ -171,27 +172,41 @@ func createContextFromDir(ctx context.Context, fs storage.FileSystem, name strin
 	if cfg == nil {
 		return ctx, nil
 	}
-
 	cfgPath := path.Join(name, cfg.ConfigName)
-	r, err := fs.OpenFile(ctx, cfgPath, os.O_RDONLY, 0)
-	if err != nil {
-		return ctx, nil
-	}
-
-	defer r.Close()
-
-	b, err := io.ReadAll(r)
-	if err != nil {
-		return ctx, nil
-	}
-
-	if err := yaml.Unmarshal(b, cfg); err != nil {
-		return ctx, nil
-	}
+	cfg, _ = LoadConfig(ctx, fs, cfg, cfgPath)
 
 	log.Println("dir config", name, cfg)
 	ctx = context.WithValue(ctx, DirConfigKey, cfg)
 	return ctx, nil
+}
+
+func LoadConfig(ctx context.Context, fs storage.FileSystem, defCfg *DirConfig, filename string) (*DirConfig, error) {
+	r, err := fs.OpenFile(ctx, filename, os.O_RDONLY, 0)
+	if err != nil {
+		return defCfg, err
+	}
+	defer r.Close()
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return defCfg, err
+	}
+	if err := yaml.Unmarshal(b, defCfg); err != nil {
+		return defCfg, err
+	}
+	return defCfg, nil
+}
+
+func LoadConfigForDir(ctx context.Context, fs storage.FileSystem, defCfg *DirConfig, dirname, cfgName string) *DirConfig {
+	for len(dirname) != 0 {
+		dirname = filepath.Clean(dirname)
+		cfgPath := path.Join(dirname, cfgName)
+		if cfg, err := LoadConfig(ctx, fs, defCfg, cfgPath); err == nil {
+			return cfg
+		} else {
+			dirname = path.Dir(dirname)
+		}
+	}
+	return defCfg
 }
 
 func getConfigFromContext(ctx context.Context) *DirConfig {

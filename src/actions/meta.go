@@ -19,10 +19,9 @@ func Meta(c *gin.Context) {
 	cfg := config.GetConfig()
 	fs := storage.Local(cfg.SrcRoot)
 
-	p := c.Param("path")
-	pathname := path.Join(cfg.SrcRoot, p)
+	pathname := c.Param("path")
 
-	log.Println(pathname)
+	log.Println("Meta", pathname)
 
 	fi, err := fs.Stat(c, pathname)
 	if err != nil {
@@ -63,7 +62,7 @@ type MetaData struct {
 func createMeta(cfg *config.Config, ctx context.Context, fs storage.FileSystem, pathname string, fi fs.FileInfo) *MetaData {
 	meta := scan.GetFileMeta(ctx, fs, pathname, fi)
 	m := &MetaData{}
-	m.Name = fi.Name()
+	m.Name = meta.Name
 	m.Path = pathname
 	m.Tags = meta.Tags
 	m.Ext = scan.GetExt(fi.Name())
@@ -81,13 +80,14 @@ func isExist(filename string) bool {
 }
 
 func getDir(cfg *config.Config, ctx context.Context, src storage.FileSystem, dirname string) ([]*MetaData, fs.FileInfo, error) {
-	rd, err := src.OpenFile(ctx, dirname, os.O_RDONLY, 0)
-	if err != nil {
-		log.Panicln("get dir error", err)
-		return nil, nil, err
-	}
+	dirCfg := scan.LoadConfigForDir(ctx, src, &scan.DirConfig{
+		ConfigName: ".dir-config.yaml",
+		MetaName:   ".meta.yaml",
+	}, dirname, ".dir-config.yaml")
 
-	dirInfo, err := rd.Readdir(-1)
+	ctx = context.WithValue(ctx, scan.DirConfigKey, dirCfg)
+
+	dirInfo, err := scan.ReadDir(ctx, src, dirname)
 	if err != nil {
 		return nil, nil, err
 	}
