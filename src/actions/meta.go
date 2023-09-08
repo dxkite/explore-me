@@ -80,10 +80,7 @@ func isExist(filename string) bool {
 }
 
 func getDir(cfg *config.Config, ctx context.Context, src storage.FileSystem, dirname string) ([]*MetaData, fs.FileInfo, error) {
-	dirCfg := scan.LoadConfigForDir(ctx, src, &scan.DirConfig{
-		ConfigName: ".dir-config.yaml",
-		MetaName:   ".meta.yaml",
-	}, dirname, ".dir-config.yaml")
+	dirCfg := scan.LoadConfigForDir(ctx, src, &cfg.DirConfig, dirname, cfg.DirConfig.ConfigName)
 
 	ctx = context.WithValue(ctx, scan.DirConfigKey, dirCfg)
 

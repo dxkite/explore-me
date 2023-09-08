@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 
+	"dxkite.cn/explorer/src/core/scan"
 	goget "dxkite.cn/explorer/src/middleware/go-get"
 	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
@@ -18,6 +19,8 @@ type Config struct {
 	DataRoot string `yaml:"data_root" default:"./data"`
 	// 自动刷新时间 60s
 	AsyncLoad int `yaml:"async_time" default:"60"`
+	// 目录配置
+	DirConfig scan.DirConfig `yaml:"dir_config"`
 	// go-get
 	GoGetConfig goget.PackageConfig `yaml:"go_get_config"`
 }
