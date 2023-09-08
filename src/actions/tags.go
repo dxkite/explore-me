@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"dxkite.cn/explorer/src/core/config"
+	"dxkite.cn/explorer/src/core/scan"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +19,7 @@ type MapItem struct {
 
 func Tags(c *gin.Context) {
 	cfg := config.GetConfig()
-	f := path.Join(cfg.DataRoot, cfg.ScanConfig.TagListFile)
+	f := path.Join(cfg.DataRoot, scan.TagIndex)
 	data, err := os.ReadFile(f)
 
 	v := map[string]int{}

@@ -7,13 +7,14 @@ import (
 	"path"
 
 	"dxkite.cn/explorer/src/core/config"
+	"dxkite.cn/explorer/src/core/scan"
 	"github.com/gin-gonic/gin"
 )
 
 func Exts(c *gin.Context) {
 	cfg := config.GetConfig()
 
-	f := path.Join(cfg.DataRoot, cfg.ScanConfig.ExtListFile)
+	f := path.Join(cfg.DataRoot, scan.ExtIndex)
 	data, err := os.ReadFile(f)
 
 	v := map[string]int{}

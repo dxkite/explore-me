@@ -95,12 +95,11 @@ func getDir(cfg *config.Config, ctx context.Context, src storage.FileSystem, dir
 	md := []*MetaData{}
 
 	var readme fs.FileInfo
-	rmn := strings.ToLower(cfg.ScanConfig.ReadmeFile)
 	for _, di := range dirInfo {
 		pathname := path.Join(dirname, di.Name())
 		mdi := createMeta(cfg, ctx, src, pathname, di)
 		md = append(md, mdi)
-		if strings.ToLower(di.Name()) == rmn {
+		if strings.ToLower(di.Name()) == "readme.md" {
 			readme = di
 		}
 	}

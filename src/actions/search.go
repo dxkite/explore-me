@@ -9,6 +9,7 @@ import (
 
 	"dxkite.cn/explorer/src/core"
 	"dxkite.cn/explorer/src/core/config"
+	"dxkite.cn/explorer/src/core/scan"
 	"dxkite.cn/explorer/src/core/storage"
 	"github.com/gin-gonic/gin"
 )
@@ -33,7 +34,7 @@ func Search(c *gin.Context) {
 		return
 	}
 
-	idx := path.Join(cfg.DataRoot, cfg.ScanConfig.IndexFile)
+	idx := path.Join(cfg.DataRoot, scan.MetaIndex)
 
 	param := core.SearchParams{
 		Name: req.Name,
