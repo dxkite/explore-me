@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/fs"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -135,8 +136,10 @@ func GetFileMeta(ctx context.Context, fs storage.FileSystem, name string, info f
 
 	cfg := getConfigFromContext(ctx)
 	if cfg != nil {
-		if expr, err := loadExpr(cfg.TagExpr); err == nil {
-			tagExpr = expr
+		if cfg.TagExpr != "" {
+			if expr, err := loadExpr(cfg.TagExpr); err == nil {
+				tagExpr = expr
+			}
 		}
 		metaCfg = cfg.MetaName
 	}
@@ -147,7 +150,7 @@ func GetFileMeta(ctx context.Context, fs storage.FileSystem, name string, info f
 
 	if len(metaCfg) > 0 {
 		fn := name + metaCfg
-		meta = loadMetaFrom(fn, meta)
+		meta = loadMetaFrom(ctx, fs, fn, meta)
 	}
 
 	return meta
@@ -155,35 +158,48 @@ func GetFileMeta(ctx context.Context, fs storage.FileSystem, name string, info f
 
 func parseTag(name string, reg *regexp.Regexp) ([]string, error) {
 	matches := reg.FindAllStringSubmatch(name, -1)
+	// log.Println(matches)
 	tags := []string{}
 	for _, m := range matches {
-		tags = append(tags, m[1])
+		if len(m) >= 1 {
+			tags = append(tags, m[1])
+		}
 	}
 	return tags, nil
 }
 
-func isExist(filename string) bool {
-	_, err := os.Stat(filename)
+func isExist(ctx context.Context, fs storage.FileSystem, filename string) bool {
+	_, err := fs.Stat(ctx, filename)
 	if err != nil {
 		return false
 	}
 	return true
 }
 
-func loadMetaFrom(filename string, defVal *FileMeta) *FileMeta {
-	if !isExist(filename) {
+func loadMetaFrom(ctx context.Context, fs storage.FileSystem, filename string, defVal *FileMeta) *FileMeta {
+	log.Println("read", filename)
+
+	if !isExist(ctx, fs, filename) {
+		// log.Println("read", filename, "isExist")
 		return defVal
 	}
 
-	b, err := os.ReadFile(filename)
+	r, err := fs.OpenFile(ctx, filename, os.O_RDONLY, 0)
 	if err != nil {
+		// log.Println("read", err)
 		return defVal
 	}
 
+	defer r.Close()
+
+	b, err := io.ReadAll(r)
+	if err != nil {
+		// log.Println("read", err)
+		return defVal
+	}
 	if err := yaml.Unmarshal(b, defVal); err != nil {
 		return defVal
 	}
-
 	return defVal
 }
 

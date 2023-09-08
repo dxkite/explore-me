@@ -2,6 +2,7 @@ package scan
 
 import (
 	"context"
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -15,9 +16,9 @@ import (
 
 type DirConfig struct {
 	// 配置名
-	ConfigName string `yaml:"config_name" default:".config.yml"`
+	ConfigName string `yaml:"config_name" default:".dir-config.yaml"`
 	// 配置名
-	MetaName string `yaml:"config_name" default:".meta.yml"`
+	MetaName string `yaml:"meta_name" default:".meta.yaml"`
 	// 忽略文件名
 	IgnoreName []string `yaml:"ignore_name"`
 	// 置顶
@@ -158,20 +159,30 @@ func readDirNameFromFs(ctx context.Context, fs storage.FileSystem, name string) 
 
 func createContextFromDir(ctx context.Context, fs storage.FileSystem, name string) (context.Context, error) {
 	cfg := getConfigFromContext(ctx)
+	log.Println("read default config", name, cfg)
+
 	if cfg == nil {
 		return ctx, nil
 	}
 
 	cfgPath := path.Join(name, cfg.ConfigName)
-	d, err := os.ReadFile(cfgPath)
+	r, err := fs.OpenFile(ctx, cfgPath, os.O_RDONLY, 0)
 	if err != nil {
-		return ctx, err
+		return ctx, nil
 	}
 
-	if err := yaml.Unmarshal(d, cfg); err != nil {
-		return ctx, err
+	defer r.Close()
+
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return ctx, nil
 	}
 
+	if err := yaml.Unmarshal(b, cfg); err != nil {
+		return ctx, nil
+	}
+
+	log.Println("dir config", name, cfg)
 	return ctx, nil
 }
 
@@ -179,7 +190,14 @@ func getConfigFromContext(ctx context.Context) *DirConfig {
 	if v, ok := ctx.Value(DirConfigKey).(*DirConfig); ok {
 		return v
 	}
+	if v, ok := ctx.Value(DirConfigKey).(DirConfig); ok {
+		return &v
+	}
 	return nil
+}
+
+func init() {
+	exprCache = map[string]*regexp.Regexp{}
 }
 
 var exprCache map[string]*regexp.Regexp

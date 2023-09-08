@@ -9,7 +9,12 @@ import (
 
 func CreateIndex(root, output string) error {
 	s := scan.NewScanner(output)
-	return s.Scan(context.TODO(), storage.Local(root))
+	ctx := context.TODO()
+	ctx = context.WithValue(ctx, scan.DirConfigKey, &scan.DirConfig{
+		ConfigName: ".dir-config.yaml",
+		MetaName:   ".meta.yaml",
+	})
+	return s.Scan(ctx, storage.Local(root))
 }
 
 func CreateIndexForStorage(ctx context.Context, fs storage.FileSystem, output string) error {
