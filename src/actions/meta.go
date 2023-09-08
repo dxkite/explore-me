@@ -21,29 +21,33 @@ func Meta(c *gin.Context) {
 
 	pathname := c.Param("path")
 
-	log.Println("Meta", pathname)
+	log.Println("LoadMeta", pathname, "24")
 
 	fi, err := fs.Stat(c, pathname)
 	if err != nil {
-		if os.IsNotExist(err) {
-			c.Status(http.StatusNotFound)
-			return
-		}
+		log.Println(err)
+		c.Status(http.StatusNotFound)
+		return
 	}
 
+	log.Println("LoadMeta", pathname, "33")
 	m := createMeta(cfg, c, fs, pathname, fi)
 
-	if m.IsDir {
-		ch, rm, _ := getDir(cfg, c, fs, pathname)
+	log.Println("LoadMeta", pathname, "36")
 
+	if m.IsDir {
+		log.Println("LoadMeta", pathname, "40")
+		ch, rm, _ := getDir(cfg, c, fs, pathname)
+		log.Println("LoadMeta", pathname, "40")
 		if ch != nil {
 			m.Children = ch
 		}
-
+		log.Println("LoadMeta", pathname, "44")
 		if rm != nil {
 			m.Readme = path.Join(pathname, rm.Name())
 		}
 	}
+	log.Println("LoadMeta", pathname, "49")
 	c.JSON(http.StatusOK, m)
 }
 

@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
 	"regexp"
 	"sort"
 
@@ -197,13 +196,17 @@ func LoadConfig(ctx context.Context, fs storage.FileSystem, defCfg *DirConfig, f
 }
 
 func LoadConfigForDir(ctx context.Context, fs storage.FileSystem, defCfg *DirConfig, dirname, cfgName string) *DirConfig {
-	for len(dirname) != 0 {
-		dirname = filepath.Clean(dirname)
+	dirname = "/" + dirname
+	for {
+		dirname = path.Clean(dirname)
+		log.Println(dirname)
 		cfgPath := path.Join(dirname, cfgName)
 		if cfg, err := LoadConfig(ctx, fs, defCfg, cfgPath); err == nil {
 			return cfg
-		} else {
-			dirname = path.Dir(dirname)
+		}
+		dirname = path.Dir(dirname)
+		if dirname == "/" {
+			break
 		}
 	}
 	return defCfg
