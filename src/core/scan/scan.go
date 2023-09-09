@@ -9,11 +9,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 
 	"dxkite.cn/explorer/src/core/storage"
+	"github.com/dlclark/regexp2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -24,10 +24,10 @@ const (
 	LockFile  = "scan.lock"
 )
 
-var DefaultTagExpr *regexp.Regexp
+var DefaultTagExpr *regexp2.Regexp
 
 func init() {
-	DefaultTagExpr, _ = regexp.Compile("\\[(.+?)\\]")
+	DefaultTagExpr, _ = regexp2.Compile("\\[(.+?)\\]", 0)
 }
 
 type Index struct {
@@ -188,14 +188,22 @@ func GetFileMeta(ctx context.Context, fs storage.FileSystem, name string, info f
 	return meta
 }
 
-func parseTag(name string, reg *regexp.Regexp) ([]string, error) {
-	matches := reg.FindAllStringSubmatch(name, -1)
-	// log.Println(matches)
+func parseTag(name string, reg *regexp2.Regexp) ([]string, error) {
+	m, err := reg.FindStringMatch(name)
+	if err != nil {
+		return nil, err
+	}
+
 	tags := []string{}
-	for _, m := range matches {
-		if len(m) >= 1 {
-			tags = append(tags, m[1])
+	if m == nil {
+		return tags, nil
+	}
+	for m != nil {
+		g := m.GroupByNumber(1)
+		if len(g.Captures) >= 1 {
+			tags = append(tags, g.Captures[0].String())
 		}
+		m, _ = reg.FindNextMatch(m)
 	}
 	return tags, nil
 }

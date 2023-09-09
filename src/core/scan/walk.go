@@ -7,8 +7,9 @@ import (
 	"log"
 	"os"
 	"path"
-	"regexp"
 	"sort"
+
+	"github.com/dlclark/regexp2"
 
 	"dxkite.cn/explorer/src/core/storage"
 	"gopkg.in/yaml.v3"
@@ -120,14 +121,18 @@ func isIgnoreName(cfg *DirConfig, name string) bool {
 	if len(cfg.IgnoreName) == 0 {
 		return false
 	}
-
+	// log.Println("ignore", cfg.IgnoreName, name, "test")
 	for _, expr := range cfg.IgnoreName {
-		exp, _ := loadExpr(expr)
-		if exp != nil && exp.Match([]byte(name)) {
-			return true
+		exp, err := loadExpr(expr)
+		if err != nil {
+			log.Println(expr, "reg error", err)
+		} else {
+			if match, _ := exp.MatchString(name); match {
+				return true
+			}
 		}
 	}
-
+	// log.Println("ignore", cfg.IgnoreName, name, "test failed")
 	return false
 }
 
@@ -199,10 +204,12 @@ func LoadConfigForDir(ctx context.Context, fs storage.FileSystem, defCfg *DirCon
 	dirname = "/" + dirname
 	for {
 		dirname = path.Clean(dirname)
-		log.Println(dirname)
 		cfgPath := path.Join(dirname, cfgName)
+		log.Println("LoadConfigForDir", dirname, cfgPath)
 		if cfg, err := LoadConfig(ctx, fs, defCfg, cfgPath); err == nil {
 			return cfg
+		} else {
+			log.Println("LoadConfigForDir", dirname, cfgPath, err)
 		}
 		dirname = path.Dir(dirname)
 		if dirname == "/" {
@@ -226,17 +233,17 @@ func getConfigFromContext(ctx context.Context) *DirConfig {
 }
 
 func init() {
-	exprCache = map[string]*regexp.Regexp{}
+	exprCache = map[string]*regexp2.Regexp{}
 }
 
-var exprCache map[string]*regexp.Regexp
+var exprCache map[string]*regexp2.Regexp
 
-func loadExpr(expr string) (*regexp.Regexp, error) {
+func loadExpr(expr string) (*regexp2.Regexp, error) {
 	if v, ok := exprCache[expr]; ok {
 		return v, nil
 	}
 
-	if v, err := regexp.Compile(expr); err != nil {
+	if v, err := regexp2.Compile(expr, 0); err != nil {
 		return nil, err
 	} else {
 		exprCache[expr] = v
