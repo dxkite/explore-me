@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
 	"path"
 
 	"dxkite.cn/explorer/src/core"
@@ -60,9 +59,9 @@ func createMetaList(cfg *config.Config, fia []*core.SearchFileInfo) []*MetaData 
 	src := storage.Local(cfg.SrcRoot)
 
 	for _, f := range fia {
-		filename := path.Join(cfg.SrcRoot, f.Path)
+		filename := f.Path
+		fi, err := src.Stat(context.TODO(), filename)
 
-		fi, err := os.Stat(filename)
 		if err != nil {
 			log.Println("createMetaList:Stat", filename, err)
 			continue

@@ -64,6 +64,7 @@ type MetaData struct {
 }
 
 func createMeta(cfg *config.Config, ctx context.Context, fs storage.FileSystem, pathname string, fi fs.FileInfo) *MetaData {
+	log.Println("createMeta", pathname)
 	meta := scan.GetFileMeta(ctx, fs, pathname, fi)
 	m := &MetaData{}
 	m.Name = meta.Name
