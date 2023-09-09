@@ -5,6 +5,7 @@ import (
 
 	"dxkite.cn/explorer/src/actions"
 	"dxkite.cn/explorer/src/core/config"
+	"dxkite.cn/explorer/src/core/storage"
 	goget "dxkite.cn/explorer/src/middleware/go-get"
 	"github.com/gin-gonic/gin"
 )
@@ -33,9 +34,16 @@ func Run(cfg *config.Config) error {
 	mtx.Handle("/api/", r.Handler())
 
 	// web根目录
+	webStatic := http.FileSystem(http.Dir(cfg.WebRoot))
+
+	// 单页应用
+	if cfg.SingleIndex != "" {
+		webStatic = storage.NewSingleIndex(webStatic, cfg.SingleIndex)
+	}
+
 	mtx.Handle("/", goget.Middleware(func() *goget.PackageConfig {
 		return &config.GetConfig().GoGetConfig
-	}, http.FileServer(http.Dir(cfg.WebRoot))))
+	}, http.FileServer(webStatic)))
 
 	return http.ListenAndServe(cfg.Listen, mtx)
 }

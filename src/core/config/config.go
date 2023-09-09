@@ -13,6 +13,8 @@ type Config struct {
 	Listen string `yaml:"listen" default:":8080"`
 	// 网站目录
 	WebRoot string `yaml:"web_root" default:"./web"`
+	// 单页应用
+	SingleIndex string `yaml:"web_index" default:"/index.html"`
 	// 资源目录
 	SrcRoot string `yaml:"src_root" default:"./src"`
 	// 数据目录
