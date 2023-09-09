@@ -6,10 +6,6 @@ import (
 	"os"
 )
 
-type Single interface {
-	http.FileSystem
-}
-
 type single struct {
 	src   http.FileSystem
 	index string

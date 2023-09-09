@@ -7,6 +7,7 @@ import (
 	"dxkite.cn/explorer/src/core/config"
 	"dxkite.cn/explorer/src/core/storage"
 	goget "dxkite.cn/explorer/src/middleware/go-get"
+	"dxkite.cn/explorer/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,7 +35,13 @@ func Run(cfg *config.Config) error {
 	mtx.Handle("/api/", r.Handler())
 
 	// web根目录
-	webStatic := http.FileSystem(http.Dir(cfg.WebRoot))
+	webStatic := storage.NewPrefix("/dist", http.FS(static.Web))
+
+	// 配置了web根目录
+	if cfg.WebRoot != "" {
+		webRoot := http.FileSystem(http.Dir(cfg.WebRoot))
+		webStatic = storage.NewMultiFileSystem(webStatic, webRoot)
+	}
 
 	// 单页应用
 	if cfg.SingleIndex != "" {
