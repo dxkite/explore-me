@@ -1,4 +1,4 @@
 config.yaml
 demo
 explorer.exe
-!static/dist/whoami.txt
+static/dist/*
