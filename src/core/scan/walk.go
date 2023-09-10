@@ -102,11 +102,11 @@ func sortNames(cfg *DirConfig, infos []fs.FileInfo) {
 		}
 
 		if oki {
-			return false
+			return true
 		}
 
 		if okj {
-			return true
+			return false
 		}
 
 		return ni < nj
