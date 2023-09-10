@@ -1,9 +1,10 @@
 package storage
 
 import (
-	"log"
 	"net/http"
 	"os"
+
+	"dxkite.cn/log"
 )
 
 type single struct {

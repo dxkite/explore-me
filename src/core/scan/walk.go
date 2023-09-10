@@ -4,10 +4,11 @@ import (
 	"context"
 	"io"
 	"io/fs"
-	"log"
 	"os"
 	"path"
 	"sort"
+
+	"dxkite.cn/log"
 
 	"github.com/dlclark/regexp2"
 
@@ -194,10 +195,11 @@ func LoadConfig(ctx context.Context, fs storage.FileSystem, defCfg *DirConfig, f
 	if err != nil {
 		return defCfg, err
 	}
-	if err := yaml.Unmarshal(b, defCfg); err != nil {
+	cfg := *defCfg
+	if err := yaml.Unmarshal(b, &cfg); err != nil {
 		return defCfg, err
 	}
-	return defCfg, nil
+	return &cfg, nil
 }
 
 func LoadConfigForDir(ctx context.Context, fs storage.FileSystem, defCfg *DirConfig, dirname, cfgName string) *DirConfig {
@@ -209,13 +211,14 @@ func LoadConfigForDir(ctx context.Context, fs storage.FileSystem, defCfg *DirCon
 		if cfg, err := LoadConfig(ctx, fs, defCfg, cfgPath); err == nil {
 			return cfg
 		} else {
-			log.Println("LoadConfigForDir", dirname, cfgPath, err)
+			log.Println("LoadConfigForDirErr", dirname, cfgPath, err)
 		}
 		dirname = path.Dir(dirname)
 		if dirname == "/" {
 			break
 		}
 	}
+	log.Println("LoadConfigForDirErr", dirname, "useDefaultConfig", defCfg)
 	return defCfg
 }
 

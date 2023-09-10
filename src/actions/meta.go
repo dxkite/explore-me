@@ -3,11 +3,12 @@ package actions
 import (
 	"context"
 	"io/fs"
-	"log"
 	"net/http"
 	"os"
 	"path"
 	"strings"
+
+	"dxkite.cn/log"
 
 	"dxkite.cn/explorer/src/core/config"
 	"dxkite.cn/explorer/src/core/scan"
@@ -30,24 +31,19 @@ func Meta(c *gin.Context) {
 		return
 	}
 
-	log.Println("LoadMeta", pathname, "33")
-	m := createMeta(cfg, c, fs, pathname, fi)
-
-	log.Println("LoadMeta", pathname, "36")
-
+	m := createMeta(cfg, context.TODO(), fs, pathname, fi)
 	if m.IsDir {
-		log.Println("LoadMeta", pathname, "40")
-		ch, rm, _ := getDir(cfg, c, fs, pathname)
-		log.Println("LoadMeta", pathname, "40")
+		ch, rm, err := getDir(cfg, context.TODO(), fs, pathname)
+		if err != nil {
+			log.Println("getDir error", pathname, err)
+		}
 		if ch != nil {
 			m.Children = ch
 		}
-		log.Println("LoadMeta", pathname, "44")
 		if rm != nil {
 			m.Readme = path.Join(pathname, rm.Name())
 		}
 	}
-	log.Println("LoadMeta", pathname, "49")
 	c.JSON(http.StatusOK, m)
 }
 
@@ -64,7 +60,6 @@ type MetaData struct {
 }
 
 func createMeta(cfg *config.Config, ctx context.Context, fs storage.FileSystem, pathname string, fi fs.FileInfo) *MetaData {
-	log.Println("createMeta", pathname)
 	meta := scan.GetFileMeta(ctx, fs, pathname, fi)
 	m := &MetaData{}
 	m.Name = meta.Name
@@ -86,6 +81,7 @@ func isExist(filename string) bool {
 
 func getDir(cfg *config.Config, ctx context.Context, src storage.FileSystem, dirname string) ([]*MetaData, fs.FileInfo, error) {
 	dirCfg := scan.LoadConfigForDir(ctx, src, &cfg.DirConfig, dirname, cfg.DirConfig.ConfigName)
+	log.Println("dirConfig", dirname, dirCfg)
 
 	ctx = context.WithValue(ctx, scan.DirConfigKey, dirCfg)
 

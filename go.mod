@@ -3,6 +3,7 @@ module dxkite.cn/explorer
 go 1.20
 
 require (
+	dxkite.cn/log v0.0.0-20210731134540-dea20ca9668b // indirect
 	github.com/bytedance/sonic v1.10.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect

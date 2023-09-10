@@ -3,10 +3,11 @@ package goget
 import (
 	_ "embed"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"text/template"
+
+	"dxkite.cn/log"
 )
 
 //go:embed template.html

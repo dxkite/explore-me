@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"io"
 	"io/fs"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"dxkite.cn/log"
 
 	"dxkite.cn/explorer/src/core/storage"
 	"github.com/dlclark/regexp2"
@@ -66,6 +67,7 @@ func (s *Scanner) Scan(ctx context.Context, fs storage.FileSystem) error {
 	lockFile := path.Join(s.output, LockFile)
 	upTime, update := s.isUpdate(ctx, fs, lockFile)
 	if update == false {
+		log.Println("load index ignore: not update")
 		return nil
 	}
 
