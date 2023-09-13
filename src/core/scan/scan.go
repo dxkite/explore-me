@@ -21,7 +21,7 @@ import (
 const (
 	ExtIndex  = "exts.json"
 	TagIndex  = "tags.json"
-	MetaIndex = "index.json"
+	MetaIndex = "index.jsonl"
 	LockFile  = "scan.lock"
 )
 
