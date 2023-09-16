@@ -27,7 +27,7 @@ func Run(cfg *config.Config) error {
 	r.GET("/api/explore/search", actions.Search)
 
 	// 获取原始文件内容
-	r.StaticFS("/api/explore/raw", http.Dir(cfg.SrcRoot))
+	r.StaticFS(config.RawUrlRoot, http.Dir(cfg.SrcRoot))
 
 	mtx := http.NewServeMux()
 

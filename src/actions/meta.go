@@ -56,6 +56,7 @@ type MetaData struct {
 	IsDir    bool        `json:"is_dir"`
 	Readme   string      `json:"readme"`
 	ModTime  string      `json:"mod_time"`
+	RawUrl   string      `json:"raw_url,omitempty"`
 	Children []*MetaData `json:"children,omitempty"`
 }
 
@@ -68,6 +69,9 @@ func createMeta(cfg *config.Config, ctx context.Context, fs storage.FileSystem, 
 	m.Ext = scan.GetExt(fi.Name())
 	m.IsDir = fi.IsDir()
 	m.ModTime = meta.ModTime
+	if !m.IsDir {
+		m.RawUrl = path.Join(config.RawUrlRoot, m.Path)
+	}
 	return m
 }
 

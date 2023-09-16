@@ -9,6 +9,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const RawUrlRoot = "/api/explore/raw"
+
 type Config struct {
 	Listen string `yaml:"listen" default:":8080"`
 	// 网站目录
