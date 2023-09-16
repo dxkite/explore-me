@@ -20,6 +20,7 @@ type SearchRequest struct {
 	Ext  string `form:"ext"`
 	Tag  string `form:"tag"`
 
+	Recent bool  `form:"recent"`
 	Offset int64 `form:"offset"`
 	Limit  int64 `form:"limit"`
 }
@@ -35,6 +36,10 @@ func Search(c *gin.Context) {
 	}
 
 	idx := path.Join(cfg.DataRoot, scan.MetaIndex)
+
+	if req.Recent {
+		idx = path.Join(cfg.DataRoot, scan.RecentIndex)
+	}
 
 	param := core.SearchParams{
 		Name: req.Name,
