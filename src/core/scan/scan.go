@@ -19,10 +19,12 @@ import (
 )
 
 const (
-	ExtIndex  = "exts.json"
-	TagIndex  = "tags.json"
-	MetaIndex = "index.jsonl"
-	LockFile  = "scan.lock"
+	ExtIndex      = "exts.json"
+	TagIndex      = "tags.json"
+	MetaIndex     = "index.jsonl"
+	RecentIndex   = "recent.jsonl"
+	LockFile      = "scan.lock"
+	MaxRecentSize = 100
 )
 
 var DefaultTagExpr *regexp2.Regexp
@@ -49,6 +51,7 @@ type Scanner struct {
 	tagMap map[string]int
 	extMap map[string]int
 	idx    io.WriteCloser
+	recent *RecentFile
 	output string
 }
 
@@ -56,6 +59,7 @@ func NewScanner(output string) *Scanner {
 	return &Scanner{
 		tagMap: map[string]int{},
 		extMap: map[string]int{},
+		recent: NewRecentFile(MaxRecentSize),
 		output: output,
 	}
 }
@@ -91,6 +95,11 @@ func (s *Scanner) Scan(ctx context.Context, fs storage.FileSystem) error {
 
 	tagFile := path.Join(s.output, TagIndex)
 	if err := writeJsonFile(tagFile, s.tagMap); err != nil {
+		return err
+	}
+
+	recentFile := path.Join(s.output, RecentIndex)
+	if err := s.recent.WriteTo(recentFile); err != nil {
 		return err
 	}
 
@@ -146,6 +155,8 @@ func (s *Scanner) scanIndex(ctx context.Context, fs storage.FileSystem, name str
 		Tags: meta.Tags,
 		Ext:  ext,
 	}
+
+	s.recent.PushItem(RecentFileItem{Index: v, modTime: info.ModTime()})
 
 	if b, err := json.Marshal(v); err != nil {
 		return err
@@ -219,7 +230,7 @@ func isExist(ctx context.Context, fs storage.FileSystem, filename string) bool {
 }
 
 func loadMetaFrom(ctx context.Context, fs storage.FileSystem, filename string, defVal *FileMeta) *FileMeta {
-	log.Println("read", filename)
+	// log.Println("read", filename)
 
 	if !isExist(ctx, fs, filename) {
 		// log.Println("read", filename, "isExist")

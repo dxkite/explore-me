@@ -158,7 +158,7 @@ func ReadDir(ctx context.Context, src storage.FileSystem, name string) ([]fs.Fil
 		ctx = c
 	}
 	cfg := getConfigFromContext(ctx)
-	log.Println("ReadDir", cfg)
+	// log.Println("ReadDir", cfg)
 	sortNames(cfg, infos)
 	newInfos := []fs.FileInfo{}
 	for _, item := range infos {
@@ -172,7 +172,7 @@ func ReadDir(ctx context.Context, src storage.FileSystem, name string) ([]fs.Fil
 
 func createContextFromDir(ctx context.Context, fs storage.FileSystem, name string) (context.Context, error) {
 	cfg := getConfigFromContext(ctx)
-	log.Println("read default config", name, cfg)
+	// log.Println("read default config", name, cfg)
 
 	if cfg == nil {
 		return ctx, nil
@@ -180,7 +180,7 @@ func createContextFromDir(ctx context.Context, fs storage.FileSystem, name strin
 	cfgPath := path.Join(name, cfg.ConfigName)
 	cfg, _ = LoadConfig(ctx, fs, cfg, cfgPath)
 
-	log.Println("dir config", name, cfg)
+	// log.Println("dir config", name, cfg)
 	ctx = context.WithValue(ctx, DirConfigKey, cfg)
 	return ctx, nil
 }
