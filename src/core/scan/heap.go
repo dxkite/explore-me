@@ -10,6 +10,7 @@ import (
 
 type RecentFileItem struct {
 	Index
+	ModTime string    `json:"-"`
 	modTime time.Time `json:"-"`
 }
 
@@ -51,6 +52,7 @@ func (rf *RecentFile) Pop() interface{} {
 }
 
 func (rf *RecentFile) PushItem(item RecentFileItem) {
+	item.modTime, _ = time.Parse(time.DateTime, item.ModTime)
 	if rf.init {
 		heap.Push(rf, item)
 		heap.Pop(rf)

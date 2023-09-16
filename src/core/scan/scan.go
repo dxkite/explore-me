@@ -156,7 +156,7 @@ func (s *Scanner) scanIndex(ctx context.Context, fs storage.FileSystem, name str
 		Ext:  ext,
 	}
 
-	s.recent.PushItem(RecentFileItem{Index: v, modTime: info.ModTime()})
+	s.recent.PushItem(RecentFileItem{Index: v, ModTime: meta.ModTime})
 
 	if b, err := json.Marshal(v); err != nil {
 		return err
