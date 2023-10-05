@@ -25,6 +25,10 @@ type Config struct {
 	AsyncLoad int `yaml:"async_time" default:"60"`
 	// 目录配置
 	DirConfig scan.DirConfig `yaml:"dir_config"`
+	// 主题目录
+	ThemeRoot string `yaml:"theme_root" default:"./theme"`
+	// 主题
+	Theme string `yaml:"theme" default:"./default"`
 	// go-get
 	GoGetConfig goget.PackageConfig `yaml:"go_get_config"`
 }

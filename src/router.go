@@ -2,6 +2,7 @@ package src
 
 import (
 	"net/http"
+	"path"
 
 	"dxkite.cn/explorer/src/actions"
 	"dxkite.cn/explorer/src/core/config"
@@ -11,6 +12,31 @@ import (
 	"dxkite.cn/explorer/static"
 	"github.com/gin-gonic/gin"
 )
+
+// theme -> web_root -> inner static
+func createFs(cfg *config.Config) http.FileSystem {
+
+	webFs := []http.FileSystem{}
+
+	// 配置了web根目录
+	if cfg.Theme != "" {
+		themeRoot := path.Join(cfg.ThemeRoot, cfg.Theme)
+		themeFs := http.FileSystem(http.Dir(themeRoot))
+		webFs = append(webFs, themeFs)
+	}
+
+	// 配置了web根目录
+	if cfg.WebRoot != "" {
+		webRoot := http.FileSystem(http.Dir(cfg.WebRoot))
+		webFs = append(webFs, webRoot)
+	}
+
+	// web根目录
+	webStatic := storage.NewPrefix("/dist", http.FS(static.Web))
+	webFs = append(webFs, webStatic)
+
+	return storage.NewMultiFileSystem(webFs...)
+}
 
 func Run(cfg *config.Config) error {
 
@@ -36,20 +62,10 @@ func Run(cfg *config.Config) error {
 	// API
 	mtx.Handle("/api/", r.Handler())
 
-	// web根目录
-	webStatic := storage.NewPrefix("/dist", http.FS(static.Web))
-
-	// 配置了web根目录
-	if cfg.WebRoot != "" {
-		webRoot := http.FileSystem(http.Dir(cfg.WebRoot))
-		webStatic = storage.NewMultiFileSystem(webStatic, webRoot)
-	}
-
+	// 目录读取
+	webStatic := createFs(cfg)
 	// 单页应用
-	if cfg.SingleIndex != "" {
-		webStatic = storage.NewSingleIndex(webStatic, cfg.SingleIndex)
-	}
-
+	webStatic = storage.NewSingleIndex(webStatic, cfg.SingleIndex)
 	mtx.Handle("/", goget.Middleware(func() *goget.PackageConfig {
 		return &config.GetConfig().GoGetConfig
 	}, http.FileServer(webStatic)))
