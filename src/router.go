@@ -5,12 +5,14 @@ import (
 	"path"
 
 	"dxkite.cn/explorer/src/actions"
+	"dxkite.cn/explorer/src/core/client"
 	"dxkite.cn/explorer/src/core/config"
 	"dxkite.cn/explorer/src/core/storage"
 	"dxkite.cn/explorer/src/middleware/clientid"
 	goget "dxkite.cn/explorer/src/middleware/go-get"
 	"dxkite.cn/explorer/static"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/net/websocket"
 )
 
 // theme -> web_root -> inner static
@@ -59,8 +61,15 @@ func Run(cfg *config.Config) error {
 
 	mtx := http.NewServeMux()
 
+	clientPool := client.NewClientPool()
+	clientPool.GetClientId = func(c *websocket.Conn) string {
+		return c.Request().Header.Get(cfg.ClientIdKey)
+	}
+
 	// API
 	mtx.Handle("/api/", r.Handler())
+	// WebSocket
+	mtx.Handle("/api/websocket/client", websocket.Handler(clientPool.HandleClient))
 
 	// 目录读取
 	webStatic := createFs(cfg)
@@ -70,5 +79,5 @@ func Run(cfg *config.Config) error {
 		return &config.GetConfig().GoGetConfig
 	}, http.FileServer(webStatic)))
 
-	return http.ListenAndServe(cfg.Listen, clientid.Middleware(mtx))
+	return http.ListenAndServe(cfg.Listen, clientid.Middleware(mtx, cfg.ClientIdKey))
 }

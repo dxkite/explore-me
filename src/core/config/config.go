@@ -31,6 +31,8 @@ type Config struct {
 	Theme string `yaml:"theme" default:"./default"`
 	// go-get
 	GoGetConfig goget.PackageConfig `yaml:"go_get_config"`
+	// client-id
+	ClientIdKey string `yaml:"client_id_key" default:"client-id"`
 }
 
 func LoadConfig(filename string) (*Config, error) {
