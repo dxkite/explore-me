@@ -14,9 +14,10 @@ import (
 var tmpHtml string
 
 type Package struct {
-	Name string `yaml:"name"`
-	Repo string `yaml:"repo"`
-	Doc  string `yaml:"doc"`
+	Path   string `yaml:"path"`
+	Import string `yaml:"import"`
+	Repo   string `yaml:"repo"`
+	Doc    string `yaml:"doc"`
 }
 
 type PackageConfig struct {
@@ -49,11 +50,10 @@ func Middleware(fn func() *PackageConfig, handler http.Handler) http.Handler {
 			return
 		}
 
-		sp := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-		name := sp[0]
+		path := strings.Trim(r.URL.Path, "/")
 
 		for _, pkg := range cfg.Spec {
-			if pkg.Name == name {
+			if strings.HasPrefix(pkg.Path, path) {
 				if err := render(w, pkg); err != nil {
 					log.Println(err)
 				}
@@ -62,9 +62,10 @@ func Middleware(fn func() *PackageConfig, handler http.Handler) http.Handler {
 		}
 
 		dft := cfg.Default
-		dft.Name = name
-		dft.Repo = strings.ReplaceAll(dft.Repo, "{name}", name)
-		dft.Doc = strings.ReplaceAll(dft.Doc, "{name}", name)
+		dft.Path = strings.ReplaceAll(dft.Path, "{path}", path)
+		dft.Import = strings.ReplaceAll(dft.Import, "{path}", path)
+		dft.Repo = strings.ReplaceAll(dft.Repo, "{path}", path)
+		dft.Doc = strings.ReplaceAll(dft.Doc, "{path}", path)
 
 		if err := render(w, dft); err != nil {
 			log.Println(err)
