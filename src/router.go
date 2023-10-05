@@ -6,6 +6,7 @@ import (
 	"dxkite.cn/explorer/src/actions"
 	"dxkite.cn/explorer/src/core/config"
 	"dxkite.cn/explorer/src/core/storage"
+	"dxkite.cn/explorer/src/middleware/clientid"
 	goget "dxkite.cn/explorer/src/middleware/go-get"
 	"dxkite.cn/explorer/static"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ import (
 func Run(cfg *config.Config) error {
 
 	r := gin.Default()
+
 	//获取文件元信息
 	r.GET("/api/explore/meta/*path", actions.Meta)
 
@@ -52,5 +54,5 @@ func Run(cfg *config.Config) error {
 		return &config.GetConfig().GoGetConfig
 	}, http.FileServer(webStatic)))
 
-	return http.ListenAndServe(cfg.Listen, mtx)
+	return http.ListenAndServe(cfg.Listen, clientid.Middleware(mtx))
 }
