@@ -194,8 +194,7 @@ func GetFileMeta(ctx context.Context, fs storage.FileSystem, name string, info f
 	}
 
 	if len(metaCfg) > 0 {
-		fn := name + metaCfg
-		meta = loadMetaFrom(ctx, fs, fn, meta)
+		meta = getMetaForFile(ctx, fs, name, metaCfg, meta)
 	}
 
 	return meta
@@ -229,14 +228,26 @@ func isExist(ctx context.Context, fs storage.FileSystem, filename string) bool {
 	return true
 }
 
-func loadMetaFrom(ctx context.Context, fs storage.FileSystem, filename string, defVal *FileMeta) *FileMeta {
-	// log.Println("read", filename)
-
-	if !isExist(ctx, fs, filename) {
-		// log.Println("read", filename, "isExist")
-		return defVal
+func getMetaForFile(ctx context.Context, fs storage.FileSystem, filename, metaCfg string, meta *FileMeta) *FileMeta {
+	fn := filename + metaCfg
+	if isExist(ctx, fs, fn) {
+		return loadMetaFrom(ctx, fs, fn, meta)
 	}
 
+	ext := path.Ext(filename)
+	basename := strings.TrimRight(filename, ext)
+	if fn != "" {
+		fn := basename + metaCfg
+		if isExist(ctx, fs, fn) {
+			return loadMetaFrom(ctx, fs, fn, meta)
+		}
+	}
+
+	return meta
+}
+
+func loadMetaFrom(ctx context.Context, fs storage.FileSystem, filename string, defVal *FileMeta) *FileMeta {
+	// log.Println("read", filename)
 	r, err := fs.OpenFile(ctx, filename, os.O_RDONLY, 0)
 	if err != nil {
 		// log.Println("read", err)
