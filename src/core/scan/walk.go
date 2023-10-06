@@ -27,6 +27,8 @@ type DirConfig struct {
 	Pin []string `yaml:"pin"`
 	// [(.*)] 标签表达式
 	TagExpr string `yaml:"tag_expr" default:"\\[(.+?)\\]"`
+	// 跳过目录扫描
+	SkipDir bool `yaml:"skip_dir"`
 }
 
 type dirConfig string
@@ -56,7 +58,12 @@ func walk(ctx context.Context, fs storage.FileSystem, name string, info fs.FileI
 		return fn(ctx, fs, name, info, nil)
 	}
 
-	infos, err := ReadDir(ctx, fs, name)
+	cfg := readDirConfig(ctx, fs, name)
+	if cfg.SkipDir {
+		return nil
+	}
+
+	infos, err := readDir(ctx, fs, name, cfg)
 	if err != nil {
 		log.Println("readDirNameFromFs", err)
 		return err
@@ -137,7 +144,7 @@ func isIgnoreName(cfg *DirConfig, name string) bool {
 	return false
 }
 
-func readDir(ctx context.Context, fs storage.FileSystem, name string) ([]fs.FileInfo, error) {
+func readDirFileInfo(ctx context.Context, fs storage.FileSystem, name string) ([]fs.FileInfo, error) {
 	f, err := fs.OpenFile(ctx, name, os.O_RDONLY, 0)
 	if err != nil {
 		return nil, err
@@ -149,15 +156,18 @@ func readDir(ctx context.Context, fs storage.FileSystem, name string) ([]fs.File
 	return list, nil
 }
 
-func ReadDir(ctx context.Context, src storage.FileSystem, name string) ([]fs.FileInfo, error) {
-	infos, err := readDir(ctx, src, name)
-	if err != nil {
-		return nil, err
-	}
+func readDirConfig(ctx context.Context, src storage.FileSystem, name string) *DirConfig {
 	if c, err := createContextFromDir(ctx, src, name); err == nil {
 		ctx = c
 	}
-	cfg := getConfigFromContext(ctx)
+	return getConfigFromContext(ctx)
+}
+
+func readDir(ctx context.Context, src storage.FileSystem, name string, cfg *DirConfig) ([]fs.FileInfo, error) {
+	infos, err := readDirFileInfo(ctx, src, name)
+	if err != nil {
+		return nil, err
+	}
 	// log.Println("ReadDir", cfg)
 	sortNames(cfg, infos)
 	newInfos := []fs.FileInfo{}
@@ -168,6 +178,12 @@ func ReadDir(ctx context.Context, src storage.FileSystem, name string) ([]fs.Fil
 		newInfos = append(newInfos, item)
 	}
 	return newInfos, nil
+}
+
+func ReadDir(ctx context.Context, src storage.FileSystem, name string) ([]fs.FileInfo, error) {
+	cfg := readDirConfig(ctx, src, name)
+	infos, err := readDir(ctx, src, name, cfg)
+	return infos, err
 }
 
 func createContextFromDir(ctx context.Context, fs storage.FileSystem, name string) (context.Context, error) {
