@@ -2,7 +2,8 @@ package storage
 
 import (
 	"net/http"
-	"os"
+
+	"dxkite.cn/log"
 )
 
 type multiFileSystem struct {
@@ -18,10 +19,8 @@ func (m *multiFileSystem) Open(name string) (http.File, error) {
 	for _, src := range m.src {
 		f, err := src.Open(name)
 		if err != nil {
-			if os.IsNotExist(err) {
-				continue
-			}
-			return nil, err
+			log.Info(name, f, err)
+			continue
 		}
 		return f, nil
 	}
