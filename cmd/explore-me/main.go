@@ -6,9 +6,9 @@ import (
 
 	"dxkite.cn/log"
 
-	"dxkite.cn/explorer/src"
-	"dxkite.cn/explorer/src/core"
-	"dxkite.cn/explorer/src/core/config"
+	"dxkite.cn/explore-me/src"
+	"dxkite.cn/explore-me/src/core"
+	"dxkite.cn/explore-me/src/core/config"
 )
 
 func Async(filename string, ticker *time.Ticker) {

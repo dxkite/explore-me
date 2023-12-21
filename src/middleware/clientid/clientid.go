@@ -3,7 +3,7 @@ package clientid
 import (
 	"net/http"
 
-	"dxkite.cn/explorer/src/core/utils"
+	"dxkite.cn/explore-me/src/core/utils"
 	"dxkite.cn/log"
 )
 

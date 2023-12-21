@@ -1,4 +1,4 @@
-module dxkite.cn/explorer
+module dxkite.cn/explore-me
 
 go 1.20
 

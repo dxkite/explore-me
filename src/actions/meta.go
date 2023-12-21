@@ -10,9 +10,9 @@ import (
 
 	"dxkite.cn/log"
 
-	"dxkite.cn/explorer/src/core/config"
-	"dxkite.cn/explorer/src/core/scan"
-	"dxkite.cn/explorer/src/core/storage"
+	"dxkite.cn/explore-me/src/core/config"
+	"dxkite.cn/explore-me/src/core/scan"
+	"dxkite.cn/explore-me/src/core/storage"
 	"github.com/gin-gonic/gin"
 )
 

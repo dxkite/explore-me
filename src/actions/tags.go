@@ -7,8 +7,8 @@ import (
 	"path"
 	"sort"
 
-	"dxkite.cn/explorer/src/core/config"
-	"dxkite.cn/explorer/src/core/scan"
+	"dxkite.cn/explore-me/src/core/config"
+	"dxkite.cn/explore-me/src/core/scan"
 	"github.com/gin-gonic/gin"
 )
 

@@ -3,9 +3,9 @@ package core
 import (
 	"context"
 
-	"dxkite.cn/explorer/src/core/config"
-	"dxkite.cn/explorer/src/core/scan"
-	"dxkite.cn/explorer/src/core/storage"
+	"dxkite.cn/explore-me/src/core/config"
+	"dxkite.cn/explore-me/src/core/scan"
+	"dxkite.cn/explore-me/src/core/storage"
 )
 
 func CreateIndex(cfg *config.Config) error {

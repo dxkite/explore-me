@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"dxkite.cn/explorer/src/core/scan"
-	"dxkite.cn/explorer/src/core/stream"
+	"dxkite.cn/explore-me/src/core/scan"
+	"dxkite.cn/explore-me/src/core/stream"
 )
 
 type SearchParams struct {

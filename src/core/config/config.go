@@ -3,8 +3,8 @@ package config
 import (
 	"os"
 
-	"dxkite.cn/explorer/src/core/scan"
-	goget "dxkite.cn/explorer/src/middleware/go-get"
+	"dxkite.cn/explore-me/src/core/scan"
+	goget "dxkite.cn/explore-me/src/middleware/go-get"
 	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
 )
