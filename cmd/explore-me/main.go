@@ -9,6 +9,7 @@ import (
 	"dxkite.cn/explore-me/src"
 	"dxkite.cn/explore-me/src/core"
 	"dxkite.cn/explore-me/src/core/config"
+	"dxkite.cn/explore-me/src/core/firstrun"
 )
 
 func Async(filename string, ticker *time.Ticker) {
@@ -23,9 +24,12 @@ func Async(filename string, ticker *time.Ticker) {
 }
 
 func main() {
-	filename := "./config.yaml"
+	filename := "./.explore-me/config.yaml"
+
 	if len(os.Args) > 1 {
 		filename = os.Args[1]
+	} else {
+		firstrun.Init("./")
 	}
 
 	err := config.InitConfig(filename)

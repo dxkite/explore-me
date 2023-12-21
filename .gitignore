@@ -1,5 +1,7 @@
 config.yaml
 demo
 explorer.exe
+explore-me.exe
 static/dist/*
 run.bat
+.explore-me
