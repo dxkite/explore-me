@@ -1,5 +1,5 @@
-# Explorer
+# Explore Me
 
 - [x] explore file
 - [x] preview markdown
-- [ ] preview media
+- [x] preview media
