@@ -29,6 +29,8 @@ type Config struct {
 	ThemeRoot string `yaml:"theme_root" default:"./theme"`
 	// 主题
 	Theme string `yaml:"theme" default:"./default"`
+	// 主题配置文件
+	ThemeConfig string `yaml:"theme_config"`
 	// go-get
 	GoGetConfig goget.PackageConfig `yaml:"go_get_config"`
 	// client-id

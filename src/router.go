@@ -56,6 +56,9 @@ func Run(cfg *config.Config) error {
 	//搜索文件
 	r.GET("/api/explore/search", actions.Search)
 
+	//搜索文件
+	r.GET("/api/explore/theme-config", actions.ThemeConfig)
+
 	// 获取原始文件内容
 	r.StaticFS(config.RawUrlRoot, http.Dir(cfg.SrcRoot))
 
