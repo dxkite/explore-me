@@ -19,9 +19,11 @@ func Init(root string) error {
 	initConfig.WebRoot = path.Join(root, ".explore-me/web")
 	initConfig.SrcRoot = root
 	initConfig.DirConfig = scan.DirConfig{
+		TagExpr: "\\[(.+?)\\]",
 		IgnoreName: []string{
 			".explore-me",
 			".git",
+			".dir-config.yaml",
 		},
 	}
 
