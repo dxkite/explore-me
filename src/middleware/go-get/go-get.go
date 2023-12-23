@@ -1,7 +1,6 @@
 package goget
 
 import (
-	_ "embed"
 	"io"
 	"net/http"
 	"strings"
@@ -10,8 +9,22 @@ import (
 	"dxkite.cn/log"
 )
 
-//go:embed template.html
-var tmpHtml string
+var tmpHtml string = `<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="go-import" content="{{ .Import }} git {{ .Repo }}">
+    <meta name="go-source"
+        content="{{ .Import }} {{ .Repo }} {{ .Repo }}/tree/master{/dir} {{ .Repo }}/blob/master{/dir}/{file}#L{line}">
+    <meta http-equiv="refresh" content="0; url={{ .Doc }}">
+</head>
+
+<body>
+    Nothing to see here; <a href="{{ .Doc }}">move along</a>.
+</body>
+
+</html>`
 
 type Package struct {
 	Path   string `yaml:"path"`
