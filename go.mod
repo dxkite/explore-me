@@ -3,7 +3,7 @@ module dxkite.cn/explore-me
 go 1.20
 
 require (
-	dxkite.cn/log v0.0.0-20231110151226-1d39a23377db
+	dxkite.cn/log v0.0.0-20231223031556-af51d674478f
 	github.com/creasty/defaults v1.7.0
 	github.com/dlclark/regexp2 v1.10.0
 	github.com/gin-gonic/gin v1.9.1

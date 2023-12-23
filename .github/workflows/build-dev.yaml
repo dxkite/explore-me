@@ -1,0 +1,78 @@
+name: Build Develop
+on:
+  push:
+    branches:
+      - master
+jobs:
+  release-dev:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      -
+        name: Build theme
+        run: |
+          git clone https://github.com/dxkite/explorer-web.git
+          cd explorer-web
+          npm install
+          npm run build -- --output=../static/dist
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.20"
+      - name: Build
+        run: |
+          chmod +x ./.github/build-dev.sh && ./.github/build-dev.sh
+          ls -alh
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: dev
+          allowUpdates: true
+          draft: true
+          artifactErrorsFailBuild: true
+          artifacts: "*.tar.gz"
+          token: ${{ secrets.GITHUB_TOKEN }}
+  release-windows-dev:
+    runs-on: windows-latest
+    permissions: write-all
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      -
+        name: Build theme
+        run: |
+          git clone https://github.com/dxkite/explorer-web.git
+          cd explorer-web
+          npm install
+          npm run build -- --output=../static/dist
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.20"
+      - name: Build
+        run: |
+          ./.github/build-dev-windows.bat
+          dir
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: dev
+          allowUpdates: true
+          draft: true
+          artifactErrorsFailBuild: true
+          artifacts: "*.exe.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}

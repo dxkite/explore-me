@@ -2,6 +2,10 @@ dxkite.cn/log v0.0.0-20210731134540-dea20ca9668b h1:0v0C8NAa91TJMu3bH96dXGj5E8Rt
 dxkite.cn/log v0.0.0-20210731134540-dea20ca9668b/go.mod h1:F/UzVcPzPUTqlc7vB0qdXkaKekuRy/1Pz1d5EjZxSaE=
 dxkite.cn/log v0.0.0-20231110151226-1d39a23377db h1:3dc16xgDZQPXrWE6muXNYPrrTKMR19tRNmi3m+cvvVE=
 dxkite.cn/log v0.0.0-20231110151226-1d39a23377db/go.mod h1:F/UzVcPzPUTqlc7vB0qdXkaKekuRy/1Pz1d5EjZxSaE=
+dxkite.cn/log v0.0.0-20231111065119-1182e5fe301c h1:FygJltxk2uuSjUBcMOFxWeq6Vkhqm9heE6S+Z2/t4pM=
+dxkite.cn/log v0.0.0-20231111065119-1182e5fe301c/go.mod h1:F/UzVcPzPUTqlc7vB0qdXkaKekuRy/1Pz1d5EjZxSaE=
+dxkite.cn/log v0.0.0-20231223031556-af51d674478f h1:n46QWs5+a8jRfCN71mS1DJE6c+LGP40naTbtzcM1STw=
+dxkite.cn/log v0.0.0-20231223031556-af51d674478f/go.mod h1:F/UzVcPzPUTqlc7vB0qdXkaKekuRy/1Pz1d5EjZxSaE=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.10.0-rc/go.mod h1:ElCzW+ufi8qKqNW0FY314xriJhyJhuoJ3gFZdAHF7NM=
 github.com/bytedance/sonic v1.10.0 h1:qtNZduETEIWJVIyDl01BeNxur2rW9OwTQ/yBqFRkKEk=
