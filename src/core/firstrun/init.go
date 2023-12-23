@@ -5,10 +5,6 @@ import (
 	"path"
 
 	"errors"
-
-	"dxkite.cn/explore-me/src/core/config"
-	"dxkite.cn/explore-me/src/core/scan"
-	"gopkg.in/yaml.v3"
 )
 
 var themeConfig = `name: "Explore Me"
@@ -23,6 +19,20 @@ videoViewExt: ["3gpp","3gp","ts","mp4","mpeg","mpg","mov","webm","flv","m4v","mn
 markdownRawExt: ["jpg","jpeg","gif","png","svg","webp","bmp","ico",""]
 `
 
+var defaultConfig = `listen: :80
+web_root: .explore-me/web
+src_root: ./
+web_index: /index.html
+data_root: .explore-me/data
+async_time: 60
+dir_config:
+    config_name: .dir-config.yaml
+    meta_name: .meta.yaml
+    ignore_name:
+        - ^\..+$
+theme_config: .explore-me/theme-config.yaml
+`
+
 func Init(root string) error {
 	configPath := path.Join(root, ".explore-me", "config.yaml")
 	themeConfigFile := path.Join(root, ".explore-me", "theme-config.yaml")
@@ -31,32 +41,11 @@ func Init(root string) error {
 		return nil
 	}
 
-	initConfig := &config.Config{}
-	initConfig.Listen = ":80"
-	initConfig.AsyncLoad = 60
-	initConfig.DataRoot = path.Join(root, ".explore-me/data")
-	initConfig.WebRoot = path.Join(root, ".explore-me/web")
-	initConfig.SrcRoot = root
-	initConfig.ThemeConfig = themeConfigFile
-	initConfig.DirConfig = scan.DirConfig{
-		ConfigName: ".dir-config.yaml",
-		MetaName:   ".meta.yaml",
-		TagExpr:    "\\[(.+?)\\]",
-		IgnoreName: []string{
-			"^\\..+$",
-		},
-	}
-
-	out, err := yaml.Marshal(initConfig)
-	if err != nil {
-		return errors.Join(errors.New("config config error"), err)
-	}
-
 	if err := os.MkdirAll(path.Join(root, ".explore-me"), os.ModePerm); err != nil {
 		return errors.Join(errors.New("make dir error"), err)
 	}
 
-	if err := os.WriteFile(configPath, out, os.ModePerm); err != nil {
+	if err := os.WriteFile(configPath, []byte(defaultConfig), os.ModePerm); err != nil {
 		return errors.Join(errors.New("create config error"), err)
 	}
 
