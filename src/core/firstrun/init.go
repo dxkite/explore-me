@@ -43,11 +43,14 @@ func Init() error {
 		return nil
 	}
 
-	if err := os.MkdirAll(path.Join(root, ".explore-me"), os.ModePerm); err != nil {
+	exploreMe := path.Join(root, ".explore-me")
+	if err := os.MkdirAll(exploreMe, os.ModePerm); err != nil {
 		return errors.Join(errors.New("make dir error"), err)
 	}
 
-	if err := os.MkdirAll(path.Join(root, ".explore-me", "web"), os.ModePerm); err != nil {
+	_ = Hide(exploreMe)
+
+	if err := os.MkdirAll(path.Join(exploreMe, "web"), os.ModePerm); err != nil {
 		return errors.Join(errors.New("make dir error"), err)
 	}
 
