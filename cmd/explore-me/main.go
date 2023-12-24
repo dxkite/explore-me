@@ -29,7 +29,7 @@ func main() {
 	if len(os.Args) > 1 {
 		filename = os.Args[1]
 	} else {
-		firstrun.Init("./")
+		firstrun.Init()
 	}
 
 	err := config.InitConfig(filename)

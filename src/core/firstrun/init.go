@@ -8,7 +8,7 @@ import (
 )
 
 var themeConfig = `name: "Explore Me"
-logo: "/dxkite.png"
+logo: "/logo.png"
 copyrightName: "dxkite"
 websiteRecord: ""
 websiteRecordLink: ""
@@ -33,7 +33,9 @@ dir_config:
 theme_config: .explore-me/theme-config.yaml
 `
 
-func Init(root string) error {
+func Init() error {
+	root := "./"
+
 	configPath := path.Join(root, ".explore-me", "config.yaml")
 	themeConfigFile := path.Join(root, ".explore-me", "theme-config.yaml")
 
@@ -42,6 +44,10 @@ func Init(root string) error {
 	}
 
 	if err := os.MkdirAll(path.Join(root, ".explore-me"), os.ModePerm); err != nil {
+		return errors.Join(errors.New("make dir error"), err)
+	}
+
+	if err := os.MkdirAll(path.Join(root, ".explore-me", "web"), os.ModePerm); err != nil {
 		return errors.Join(errors.New("make dir error"), err)
 	}
 
