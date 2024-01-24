@@ -8,9 +8,7 @@ ExploreMe 是一个基于文件系统的 Markdown 静态博客系统
 - [x] 视频在线预览
 - [x] 自定义主题 [默认主题](https://github.com/dxkite/explorer-web)
 
-
 ## 使用
-
 
 ### 下载
 
